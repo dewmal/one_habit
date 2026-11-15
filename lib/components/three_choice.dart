@@ -39,7 +39,10 @@ class ThreeChoice extends StatelessWidget {
                   ),
                   textStyle: AppText.body.copyWith(fontWeight: FontWeight.w600),
                 ),
-                child: Text(labels[i]),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(labels[i], maxLines: 1),
+                ),
               ),
             ),
           ),

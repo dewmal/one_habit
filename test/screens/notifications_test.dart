@@ -24,7 +24,7 @@ void main() {
       container.read(appProvider.notifier).finishOnboarding();
       await tester.pumpAndSettle();
 
-        Navigator.of(tester.element(find.byType(Scaffold).first))
+      Navigator.of(tester.element(find.byType(Scaffold).first))
           .push(MaterialPageRoute(builder: (_) => const NotificationsPage()));
       await tester.pumpAndSettle();
 
