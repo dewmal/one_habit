@@ -4,4 +4,7 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Debug builds only: the dev gateway runs on the Mac over plain http on
+         the Wi-Fi network. Release builds keep the default (no plain http). -->
+    <application android:usesCleartextTraffic="true"/>
 </manifest>
