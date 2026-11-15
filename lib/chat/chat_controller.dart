@@ -32,6 +32,13 @@ class LevelCardData extends ChatCard {
   final bool healthLock;
 }
 
+class LogCardData extends ChatCard {
+  const LogCardData({required this.tasks, required this.initialResults});
+
+  final List<String> tasks;
+  final Map<int, TaskResult> initialResults;
+}
+
 /// One bubble. Text is kept for every language so the chat re-translates
 /// when the user switches language.
 class ChatMessage {
@@ -198,6 +205,31 @@ class ChatController extends Notifier<ChatState> {
 
   String _placeLevel() =>
       placeLevel(fitnessPlugin, state.answers, healthLock: state.healthLock);
+
+  /// "Log how it went": the log card opens in chat with today's results so far.
+  void openDailyLog(List<String> tasks, Map<int, TaskResult> results) {
+    _append(
+      _agent(
+        textOf('log.question'),
+        card: LogCardData(tasks: tasks, initialResults: results),
+      ),
+    );
+  }
+
+  /// Saves the log card. The reply is the fixed phrase, never AI text.
+  void saveDailyLog(
+    int messageId,
+    Map<int, TaskResult> results,
+    Feeling feeling,
+  ) {
+    ref.read(dayProvider.notifier).saveLog(results, feeling);
+    state = state.copyWith(
+      messages: [
+        for (final m in state.messages) m.id == messageId ? m.withoutCard() : m,
+      ],
+    );
+    _say(textOf('log.saved_reply'));
+  }
 
   /// The user typed text, or tapped a quick reply (pass [reply]).
   void send(String raw, {ChatReply? reply}) {

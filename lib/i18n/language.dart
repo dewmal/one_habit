@@ -69,6 +69,19 @@ const Map<String, Map<AppLanguage, String>> _strings = {
   },
   'today.log_button': {AppLanguage.en: 'Log how it went'},
   'plan.title': {AppLanguage.en: 'Plan'},
+  'log.question': {AppLanguage.en: 'How did today go?'},
+  'log.done': {AppLanguage.en: 'Done'},
+  'log.partly': {AppLanguage.en: 'Partly'},
+  'log.skipped': {AppLanguage.en: 'Skipped'},
+  'log.feel': {AppLanguage.en: 'How did it feel?'},
+  'log.easy': {AppLanguage.en: 'Easy'},
+  'log.okay': {AppLanguage.en: 'Okay'},
+  'log.hard': {AppLanguage.en: 'Hard'},
+  'log.save': {AppLanguage.en: 'Save'},
+  // Fixed phrase, same for Done and Skipped. Wording needs approval (due Mon Nov 23).
+  'log.saved_reply': {
+    AppLanguage.en: 'Thanks for logging today. Every day you show up counts.',
+  },
   'plan.here': {AppLanguage.en: 'You are here'},
   'plan.goal': {AppLanguage.en: 'Your goal: {goal}'},
   'plan.note': {

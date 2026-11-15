@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../chat/chat_controller.dart';
 import '../components/info_card.dart';
+import '../components/log_card.dart';
 import '../components/level_card.dart';
 import '../plugins/fitness_plugin.dart';
 import '../components/chat_bubbles.dart';
@@ -73,7 +74,7 @@ class ChatPage extends ConsumerWidget {
   ) {
     final items = <Widget>[];
     for (var i = 0; i < messages.length; i++) {
-      items.add(_message(messages[i], language));
+      items.add(_message(messages[i], language, controller));
       if (i == lastAgentIndex && messages[i].replies.isNotEmpty) {
         items.add(const SizedBox(height: AppSpacing.gap8));
         items.add(
@@ -90,7 +91,11 @@ class ChatPage extends ConsumerWidget {
     return items.reversed.toList();
   }
 
-  Widget _message(ChatMessage message, AppLanguage language) {
+  Widget _message(
+    ChatMessage message,
+    AppLanguage language,
+    ChatController controller,
+  ) {
     final text = resolve(message.text, language);
     if (!message.fromAgent) return UserBubble(text: text);
     final card = message.card;
@@ -112,6 +117,27 @@ class ChatPage extends ConsumerWidget {
             ],
           ),
         ),
+        if (card is LogCardData) ...[
+          const SizedBox(height: AppSpacing.gap8),
+          LogCard(
+            tasks: card.tasks,
+            initialResults: card.initialResults,
+            resultLabels: [
+              tr('log.done', language),
+              tr('log.partly', language),
+              tr('log.skipped', language),
+            ],
+            feelingLabels: [
+              tr('log.easy', language),
+              tr('log.okay', language),
+              tr('log.hard', language),
+            ],
+            feelingHeading: tr('log.feel', language),
+            saveLabel: tr('log.save', language),
+            onSave: (results, feeling) =>
+                controller.saveDailyLog(message.id, results, feeling),
+          ),
+        ],
         if (card is LevelCardData) ...[
           const SizedBox(height: AppSpacing.gap8),
           LevelCard(

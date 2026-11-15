@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app/dummy_data.dart';
+import '../chat/chat_controller.dart';
 import '../app/day_state.dart';
 import '../app/tabs.dart';
 import '../components/main_button.dart';
@@ -89,8 +90,12 @@ class TodayPage extends ConsumerWidget {
             const SizedBox(height: AppSpacing.gap16),
             MainButton(
               label: tr('today.log_button', language),
-              onPressed: () =>
-                  ref.read(tabProvider.notifier).select(AppTab.chat),
+              onPressed: () {
+                ref
+                    .read(chatProvider.notifier)
+                    .openDailyLog(day.tasks, day.results);
+                ref.read(tabProvider.notifier).select(AppTab.chat);
+              },
             ),
             const SizedBox(height: AppSpacing.gap16),
           ],

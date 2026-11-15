@@ -151,11 +151,11 @@ These are not code. Each one blocks a specific day, so write them before that da
 ### Mon Nov 23 — Logging (screens 6, 12)
 
 - [ ] Work through Sunday's fix list
-- [ ] `ThreeChoice` component: three equal buttons, selected one is navy with white text
-- [ ] **Screen 6 Daily log:** agent bubble "How did today go?", log card with Done / Partly / Skipped per task, Easy / Okay / Hard, and Save
+- [x] `ThreeChoice` component: three equal buttons, selected one is navy with white text
+- [x] **Screen 6 Daily log:** agent bubble "How did today go?", log card with Done / Partly / Skipped per task, Easy / Okay / Hard, and Save
 - [ ] Save writes one daily log record: date, each task's result, the feeling. No AI call, works offline
-- [ ] Reply after saving is the fixed phrase, never AI text. Skipped gets the same calm reply as Done
-- [ ] "Log how it went" on Today opens the log card in Chat
+- [x] Reply after saving is the fixed phrase, never AI text. Skipped gets the same calm reply as Done
+- [x] "Log how it went" on Today opens the log card in Chat
 - [ ] **Screen 12 History:** one row per day, newest first, plain-word summary ("2 done, 1 partly"), feeling as a small tag
 - [ ] History has no scores, no streak numbers, no warning colours. A day with no log is shown calmly
 
