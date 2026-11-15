@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:one_preccent/app/day_state.dart';
 import 'package:one_preccent/main.dart';
 
+import '../support/test_llm_client.dart';
+
 void main() {
   testWidgets(
     'Looks good opens Today with only today\'s tasks and the bottom nav',
@@ -13,7 +15,12 @@ void main() {
       tester.view.devicePixelRatio = 3;
       addTearDown(tester.view.reset);
 
-      await tester.pumpWidget(const ProviderScope(child: HabitAgentApp()));
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: testAiOverrides(),
+          child: const HabitAgentApp(),
+        ),
+      );
       await tester.tap(find.text('Start'));
       await tester.pump();
       await tester.enterText(find.byType(TextField), 'Gym every day');

@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:one_preccent/main.dart';
 
+import '../support/test_llm_client.dart';
+
 Future<void> _finishPlacement(WidgetTester tester) async {
   await tester.tap(find.text('Start'));
   await tester.pump();
@@ -28,7 +30,9 @@ void main() {
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(const ProviderScope(child: HabitAgentApp()));
+    await tester.pumpWidget(
+      ProviderScope(overrides: testAiOverrides(), child: const HabitAgentApp()),
+    );
     await _finishPlacement(tester);
 
     expect(find.text('Quick health check'), findsOneWidget);

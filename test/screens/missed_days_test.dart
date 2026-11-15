@@ -8,6 +8,8 @@ import 'package:one_preccent/app/dummy_data.dart';
 import 'package:one_preccent/chat/chat_controller.dart';
 import 'package:one_preccent/main.dart';
 
+import '../support/test_llm_client.dart';
+
 void main() {
   testWidgets('after missed days the step gets smaller and never bigger', (
     tester,
@@ -16,7 +18,9 @@ void main() {
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(const ProviderScope(child: HabitAgentApp()));
+    await tester.pumpWidget(
+      ProviderScope(overrides: testAiOverrides(), child: const HabitAgentApp()),
+    );
     final container = ProviderScope.containerOf(
       tester.element(find.byType(HabitAgentApp)),
     );

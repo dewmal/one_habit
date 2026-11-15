@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:one_preccent/app/app_state.dart';
 import 'package:one_preccent/main.dart';
 
+import '../support/test_llm_client.dart';
+
 void main() {
   testWidgets(
     'Plan lists five stages, marks the current one, and is view only',
@@ -13,7 +15,12 @@ void main() {
       tester.view.devicePixelRatio = 3;
       addTearDown(tester.view.reset);
 
-      await tester.pumpWidget(const ProviderScope(child: HabitAgentApp()));
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: testAiOverrides(),
+          child: const HabitAgentApp(),
+        ),
+      );
       // Dummy session: go straight to the main app.
       final container = ProviderScope.containerOf(
         tester.element(find.byType(HabitAgentApp)),

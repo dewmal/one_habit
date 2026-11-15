@@ -4,12 +4,16 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:one_preccent/main.dart';
 
+import '../support/test_llm_client.dart';
+
 Future<void> _toLevelCard(
   WidgetTester tester, {
   required String exercise,
   required List<bool> health,
 }) async {
-  await tester.pumpWidget(const ProviderScope(child: HabitAgentApp()));
+  await tester.pumpWidget(
+    ProviderScope(overrides: testAiOverrides(), child: const HabitAgentApp()),
+  );
   await tester.tap(find.text('Start'));
   await tester.pump();
   await tester.enterText(find.byType(TextField), 'Gym every day');

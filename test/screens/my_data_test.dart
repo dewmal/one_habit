@@ -8,6 +8,8 @@ import 'package:one_preccent/app/dummy_data.dart';
 import 'package:one_preccent/main.dart';
 import 'package:one_preccent/screens/my_data_page.dart';
 
+import '../support/test_llm_client.dart';
+
 void main() {
   testWidgets(
     'delete really removes the daily log, and delete everything returns to Welcome',
@@ -16,7 +18,12 @@ void main() {
       tester.view.devicePixelRatio = 3;
       addTearDown(tester.view.reset);
 
-      await tester.pumpWidget(const ProviderScope(child: HabitAgentApp()));
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: testAiOverrides(),
+          child: const HabitAgentApp(),
+        ),
+      );
       final container = ProviderScope.containerOf(
         tester.element(find.byType(HabitAgentApp)),
       );

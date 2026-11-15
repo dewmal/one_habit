@@ -7,6 +7,8 @@ import 'package:one_preccent/app/dummy_data.dart';
 import 'package:one_preccent/app/day_state.dart';
 import 'package:one_preccent/main.dart';
 
+import '../support/test_llm_client.dart';
+
 void main() {
   testWidgets(
     'History lists days newest first with plain summaries and no scores',
@@ -15,7 +17,12 @@ void main() {
       tester.view.devicePixelRatio = 3;
       addTearDown(tester.view.reset);
 
-      await tester.pumpWidget(const ProviderScope(child: HabitAgentApp()));
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: testAiOverrides(),
+          child: const HabitAgentApp(),
+        ),
+      );
       final container = ProviderScope.containerOf(
         tester.element(find.byType(HabitAgentApp)),
       );

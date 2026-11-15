@@ -4,11 +4,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:one_preccent/i18n/language.dart';
 import 'package:one_preccent/main.dart';
 
+import 'support/test_llm_client.dart';
+
 void main() {
   testWidgets('app shell shows the app name and follows the language', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const ProviderScope(child: HabitAgentApp()));
+    await tester.pumpWidget(
+      ProviderScope(overrides: testAiOverrides(), child: const HabitAgentApp()),
+    );
     expect(find.text('Habit Agent'), findsOneWidget);
 
     final container = ProviderScope.containerOf(

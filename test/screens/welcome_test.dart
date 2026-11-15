@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:one_preccent/main.dart';
 
+import '../support/test_llm_client.dart';
+
 void main() {
   testWidgets(
     'welcome shows the AI note without scrolling and Start leaves it',
@@ -12,7 +14,12 @@ void main() {
       tester.view.devicePixelRatio = 3;
       addTearDown(tester.view.reset);
 
-      await tester.pumpWidget(const ProviderScope(child: HabitAgentApp()));
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: testAiOverrides(),
+          child: const HabitAgentApp(),
+        ),
+      );
 
       expect(find.textContaining("I'm an AI coach"), findsOneWidget);
       expect(find.byType(Scrollable), findsNothing);
@@ -29,7 +36,9 @@ void main() {
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(const ProviderScope(child: HabitAgentApp()));
+    await tester.pumpWidget(
+      ProviderScope(overrides: testAiOverrides(), child: const HabitAgentApp()),
+    );
     expect(tester.takeException(), isNull);
   });
 }
