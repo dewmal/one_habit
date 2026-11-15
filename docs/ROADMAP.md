@@ -183,7 +183,7 @@ These are not code. Each one blocks a specific day, so write them before that da
 - [ ] Buttons Done, Later, Too hard write to the daily log without opening the app `[cut 3]`
 - [ ] Tapping the body opens Today (morning) or the log card (evening)
 - [ ] Rule: never more than the user's daily limit, never inside quiet hours
-- [ ] Rules tests for the daily limit and quiet hours
+- [x] Rules tests for the daily limit and quiet hours
 - [ ] Morning step: pick today's tasks and nudge times, rules engine trims to the limit and removes quiet hours
 - [ ] **Screen 13 Settings** (suggested day): language switch, "Most reminders a day" with minus and plus, morning and evening reminder times, quiet hours, My data row, lost-phone note
 - [x] `SettingRow` component. Each change saves at once. Time rows open the Android time picker

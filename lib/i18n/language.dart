@@ -69,6 +69,15 @@ const Map<String, Map<AppLanguage, String>> _strings = {
   },
   'today.log_button': {AppLanguage.en: 'Log how it went'},
   'plan.title': {AppLanguage.en: 'Plan'},
+  'notif.app': {AppLanguage.en: 'Habit Agent'},
+  'notif.morning_title': {AppLanguage.en: "Today's small step"},
+  'notif.morning_body': {AppLanguage.en: '{task}. That is all for now.'},
+  'notif.nothing_today': {AppLanguage.en: 'Nothing planned for today.'},
+  'notif.evening_body': {
+    AppLanguage.en: 'Tap to log it. It takes a few seconds.',
+  },
+  'notif.later': {AppLanguage.en: 'Later'},
+  'notif.too_hard': {AppLanguage.en: 'Too hard'},
   'data.title': {AppLanguage.en: 'My data'},
   'data.intro': {
     AppLanguage.en: 'All of this is saved only on this phone. You can look at it or delete it any time.',

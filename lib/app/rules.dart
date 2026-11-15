@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../i18n/language.dart';
 import '../plugins/habit_plugin.dart';
 
@@ -60,4 +62,26 @@ const hardStopWords = [
 bool isHardStop(String text) {
   final lower = text.toLowerCase();
   return hardStopWords.any(lower.contains);
+}
+
+/// Whether [now] falls inside quiet hours. Quiet hours can cross midnight.
+bool inQuietHours(TimeOfDay now, TimeOfDay start, TimeOfDay end) {
+  final n = now.hour * 60 + now.minute;
+  final s = start.hour * 60 + start.minute;
+  final e = end.hour * 60 + end.minute;
+  if (s <= e) return n >= s && n < e;
+  return n >= s || n < e;
+}
+
+/// A reminder is sent only under the daily limit and outside quiet hours.
+bool canSendReminder({
+  required TimeOfDay now,
+  required int sentToday,
+  required int dailyLimit,
+  required TimeOfDay quietStart,
+  required TimeOfDay quietEnd,
+}) {
+  if (sentToday >= dailyLimit) return false;
+  if (inQuietHours(now, quietStart, quietEnd)) return false;
+  return true;
 }

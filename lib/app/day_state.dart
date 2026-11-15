@@ -67,6 +67,17 @@ class DayController extends Notifier<DayState> {
   void startDay(List<String> tasks) =>
       state = state.copyWith(tasks: tasks, results: const {});
 
+  /// Sets one task's result in today's log: null clears it.
+  void setResult(int index, TaskResult? result) {
+    final results = Map<int, TaskResult>.of(state.results);
+    if (result == null) {
+      results.remove(index);
+    } else {
+      results[index] = result;
+    }
+    state = state.copyWith(results: results);
+  }
+
   /// Ticking a task marks it done. Ticking again clears it.
   void toggleTask(int index) {
     final results = Map<int, TaskResult>.of(state.results);

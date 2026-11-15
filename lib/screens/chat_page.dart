@@ -15,6 +15,7 @@ import '../components/input_bar.dart';
 import '../components/quick_replies.dart';
 import '../i18n/language.dart';
 import 'health_check_page.dart';
+import 'notifications_page.dart';
 import '../theme/app_theme.dart';
 
 /// The General chat. Onboarding and the main app share this page.
@@ -220,10 +221,19 @@ class _DemoMenu extends StatelessWidget {
       onSelected: (value) {
         if (value == 'missed') controller.openMissedDays();
         if (value == 'stepup') controller.openStepUp();
+        if (value == 'notifications') {
+          Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => const NotificationsPage()));
+        }
       },
       itemBuilder: (_) => const [
         PopupMenuItem(value: 'missed', child: Text('Demo: missed days')),
         PopupMenuItem(value: 'stepup', child: Text('Demo: step-up offer')),
+        PopupMenuItem(
+          value: 'notifications',
+          child: Text('Demo: notifications'),
+        ),
       ],
     );
   }
