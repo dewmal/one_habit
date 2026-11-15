@@ -2,6 +2,7 @@
 # Run the app on a phone or emulator and send chat to the gateway.
 #
 # Usage: tool/run_dev.sh [gateway-host]
+#        tool/run_dev.sh macos    run as a macOS app, gateway on this Mac
 #
 # Where the gateway URL comes from, first match wins:
 #   1. gateway-host argument, e.g. 10.0.2.2 for the Android emulator
@@ -22,7 +23,11 @@ env_value() {
     | sed -e 's/^"//' -e 's/"$//'
 }
 
-if [[ $# -ge 1 ]]; then
+DEVICE_ARGS=()
+if [[ "${1:-}" == "macos" ]]; then
+  URL="http://127.0.0.1:8080/chat"
+  DEVICE_ARGS=(-d macos)
+elif [[ $# -ge 1 ]]; then
   URL="http://${1}:8080/chat"
 elif [[ -n "$(env_value GATEWAY_URL)" ]]; then
   URL="$(env_value GATEWAY_URL)"
@@ -32,4 +37,5 @@ fi
 echo "Gateway: ${URL}"
 
 FLUTTER="${FLUTTER:-flutter}"
-exec "$FLUTTER" run --dart-define=GATEWAY_URL="${URL}"
+exec "$FLUTTER" run ${DEVICE_ARGS[@]+"${DEVICE_ARGS[@]}"} \
+  --dart-define=GATEWAY_URL="${URL}"
