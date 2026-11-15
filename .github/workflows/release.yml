@@ -100,3 +100,13 @@ jobs:
               --generate-notes \
               --verify-tag
           fi
+
+      - name: Upload AAB to Google Play (internal track)
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.syigen.onehabit
+          releaseFiles: dist/*.aab
+          track: internal
+          status: completed
+          releaseName: ${{ steps.meta.outputs.version }}
