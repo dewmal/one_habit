@@ -92,8 +92,11 @@ const fitnessPlugin = HabitPlugin(
   healthCheck: HealthCheck(
     questions: [
       {AppLanguage.en: 'Health question 1 (placeholder)?'},
-      {AppLanguage.en: 'Health question 2 (placeholder)?'},
+      {
+        AppLanguage.en: 'Health question 2 (placeholder): has a doctor told you to be careful with exercise?',
+      },
       {AppLanguage.en: 'Health question 3 (placeholder)?'},
+      {AppLanguage.en: 'Health question 4 (placeholder)?'},
     ],
   ),
 );

@@ -7,6 +7,7 @@ import '../components/chat_header.dart';
 import '../components/input_bar.dart';
 import '../components/quick_replies.dart';
 import '../i18n/language.dart';
+import 'health_check_page.dart';
 import '../theme/app_theme.dart';
 
 /// The General chat. Onboarding and the main app share this page.
@@ -19,6 +20,15 @@ class ChatPage extends ConsumerWidget {
     final chat = ref.watch(chatProvider);
     final controller = ref.read(chatProvider.notifier);
     final messages = chat.messages;
+
+    // Open the health check once the placement questions are done.
+    ref.listen(chatProvider.select((s) => s.step), (previous, next) async {
+      if (next != OnboardingStep.healthCheck) return;
+      final answers = await Navigator.of(context).push<List<bool>>(
+        MaterialPageRoute(builder: (_) => const HealthCheckPage()),
+      );
+      if (answers != null) controller.finishHealthCheck(answers);
+    });
     final lastAgentIndex = messages.lastIndexWhere((m) => m.fromAgent);
 
     return Scaffold(

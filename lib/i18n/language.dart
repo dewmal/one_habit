@@ -43,6 +43,14 @@ const Map<String, Map<AppLanguage, String>> _strings = {
   'chat.question_label': {AppLanguage.en: 'Question {n} of {total}'},
   'chat.health_next': {AppLanguage.en: 'Thanks. Next, a quick health check.'},
   'chat.noted': {AppLanguage.en: 'Noted.'},
+  'chat.here_is_start': {AppLanguage.en: 'Thanks. Here is where we start.'},
+  'health.title': {AppLanguage.en: 'Quick health check'},
+  'health.question_label': {AppLanguage.en: 'Question {n} of {total}'},
+  'health.no': {AppLanguage.en: 'No'},
+  'health.yes': {AppLanguage.en: 'Yes'},
+  'health.reassure': {
+    AppLanguage.en: 'A "yes" only keeps your plan gentle. It never blocks you.',
+  },
   'chat.safe_fallback': {
     AppLanguage.en: "Let's take it one small step at a time.",
   },

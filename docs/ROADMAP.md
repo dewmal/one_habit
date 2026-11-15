@@ -89,10 +89,10 @@ These are not code. Each one blocks a specific day, so write them before that da
 - [x] `QuickReplies` component: a tap is sent as the user's answer
 - [ ] Each answer saved to the habit table
 - [ ] **Screen 3 Health check:** 3 to 4 fixed yes/no screens, plain code with no AI `[never cut]`
-- [ ] Back button, "Question 2 of 4" with a progress bar, large question, No and Yes buttons, one reassuring line
-- [ ] Question text comes from the plugin data, not from screen code
+- [x] Back button, "Question 2 of 4" with a progress bar, large question, No and Yes buttons, one reassuring line
+- [x] Question text comes from the plugin data, not from screen code
 - [ ] Save the safety check result to the habit table. Answers never leave the phone, only the result "keep very gentle" may be sent
-- [ ] A Yes never blocks the user
+- [x] A Yes never blocks the user
 - [ ] Routes: Welcome → First questions → Health check → Level and first plan
 
 **Done when:** chat asks the questions and saves answers to the phone.

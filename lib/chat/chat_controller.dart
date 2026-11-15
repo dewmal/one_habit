@@ -31,7 +31,7 @@ class ChatMessage {
   final List<ChatReply> replies;
 }
 
-enum OnboardingStep { askGoal, questions, healthCheck }
+enum OnboardingStep { askGoal, questions, healthCheck, levelPlan }
 
 class ChatState {
   const ChatState({
@@ -40,6 +40,7 @@ class ChatState {
     this.questionIndex = 0,
     this.answers = const {},
     this.goal,
+    this.healthAnswers = const [],
   });
 
   final List<ChatMessage> messages;
@@ -52,18 +53,26 @@ class ChatState {
   final Map<String, String> answers;
   final String? goal;
 
+  /// One entry per health question: true means "Yes".
+  final List<bool> healthAnswers;
+
+  /// Any "Yes" locks the plan to the gentlest level.
+  bool get healthLock => healthAnswers.any((yes) => yes);
+
   ChatState copyWith({
     List<ChatMessage>? messages,
     OnboardingStep? step,
     int? questionIndex,
     Map<String, String>? answers,
     String? goal,
+    List<bool>? healthAnswers,
   }) => ChatState(
     messages: messages ?? this.messages,
     step: step ?? this.step,
     questionIndex: questionIndex ?? this.questionIndex,
     answers: answers ?? this.answers,
     goal: goal ?? this.goal,
+    healthAnswers: healthAnswers ?? this.healthAnswers,
   );
 }
 
@@ -154,8 +163,19 @@ class ChatController extends Notifier<ChatState> {
           _say(textOf('chat.health_next'));
         }
       case OnboardingStep.healthCheck:
+      case OnboardingStep.levelPlan:
         break;
     }
+  }
+
+  /// Called when the health check screen returns its answers (true = Yes).
+  void finishHealthCheck(List<bool> answers) {
+    if (state.step != OnboardingStep.healthCheck) return;
+    state = state.copyWith(
+      healthAnswers: answers,
+      step: OnboardingStep.levelPlan,
+    );
+    _say(textOf('chat.here_is_start'));
   }
 }
 
