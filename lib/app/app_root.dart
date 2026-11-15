@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../screens/chat_page.dart';
+import '../screens/main_shell.dart';
 import '../screens/welcome_page.dart';
 import 'app_state.dart';
 
@@ -16,9 +17,10 @@ class AppRoot extends ConsumerWidget {
       case AppPhase.welcome:
         return const WelcomePage();
       case AppPhase.onboarding:
+        // Onboarding is the chat alone, with no bottom nav.
+        return const Scaffold(body: ChatPage());
       case AppPhase.main:
-        // The bottom nav joins in the Today screen commit.
-        return const ChatPage();
+        return const MainShell();
     }
   }
 }

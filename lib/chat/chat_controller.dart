@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app/app_state.dart';
+import '../app/day_state.dart';
 import '../app/dummy_data.dart';
 import '../app/rules.dart';
 import '../i18n/language.dart';
@@ -245,7 +246,9 @@ class ChatController extends Notifier<ChatState> {
   void _levelReply(ChatReply? reply) {
     switch (reply?.value) {
       case 'looks_good':
-        // Saves the plan and moves to Today. Saving to the database comes later.
+        // Starts today with the agreed steps, then moves to Today.
+        // Saving the plan to the database comes later.
+        ref.read(dayProvider.notifier).startDay(state.steps);
         ref.read(appProvider.notifier).finishOnboarding();
       case 'smaller':
         // Smaller steps need no extra check: keep only the first step.

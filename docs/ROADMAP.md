@@ -120,11 +120,11 @@ These are not code. Each one blocks a specific day, so write them before that da
 - [ ] Rules tests for the health lock and the blocklist
 - [x] `InfoCard` with the fixed "see a doctor" note, shown on screen 4 when the health lock is on
 - [ ] **Screen 5 Today:** title with project name, settings icon, stage card ("Stage 1 of 5", stage name, one calm line), task checklist, "Log how it went" button
-- [ ] `TaskTile`: a tick writes to the daily log with no AI call
-- [ ] Today works fully offline from saved data
-- [ ] Today shows no streak counters, no scores and no tomorrow's tasks
-- [ ] `BottomNav`: Chat, Today, Plan, History. Hidden on screens 1 to 4
-- [ ] Later app starts open on Today, not Welcome
+- [x] `TaskTile`: a tick writes to the daily log with no AI call
+- [x] Today works fully offline from saved data
+- [x] Today shows no streak counters, no scores and no tomorrow's tasks
+- [x] `BottomNav`: Chat, Today, Plan, History. Hidden on screens 1 to 4
+- [x] Later app starts open on Today, not Welcome
 - [ ] **Screen 11 Plan** (suggested day): view-only list of five stages, "You are here" on the current one with the move-on rule, the user's goal under the last stage
 
 **Done when:** rules tests pass, blocked wording never reaches the screen.
