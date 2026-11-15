@@ -365,12 +365,19 @@ class ChatController extends Notifier<ChatState> {
 
   /// Asks the AI for a coach reply. The rules engine still has the final say.
   Future<void> _coachReply() async {
-    // Send only the last few messages, as the privacy rule says.
-    final recent = state.messages.reversed.take(6).toList().reversed;
-    final lastMessages = [
+    // Send only the last few messages, as the privacy rule says. The history
+    // must start with a user message, so leading coach lines are dropped.
+    final recent = state.messages.reversed.take(10).toList().reversed;
+    final history = [
       for (final m in recent)
-        '${m.fromAgent ? 'Coach' : 'User'}: ${m.text[AppLanguage.en]}',
+        ChatTurn(
+          role: m.fromAgent ? 'assistant' : 'user',
+          content: m.text[AppLanguage.en] ?? '',
+        ),
     ];
+    while (history.isNotEmpty && history.first.role != 'user') {
+      history.removeAt(0);
+    }
 
     try {
       final suggestion = await ref
@@ -378,7 +385,7 @@ class ChatController extends Notifier<ChatState> {
           .chatReply(
             language: _languageName(),
             summary: 'Goal: ${state.goal ?? ''}. Level: ${state.level ?? ''}.',
-            lastMessages: lastMessages,
+            history: history,
           );
 
       // _say goes through filterOutgoing, so blocked words never show.

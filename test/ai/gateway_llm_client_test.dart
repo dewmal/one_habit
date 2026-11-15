@@ -32,7 +32,10 @@ void main() {
     await client.chatReply(
       language: 'English',
       summary: 'Goal: walk.',
-      lastMessages: const ['User: hi'],
+      history: const [
+        ChatTurn(role: 'assistant', content: 'Hello'),
+        ChatTurn(role: 'user', content: 'hi'),
+      ],
     );
 
     expect(sent.url.toString(), _url);
@@ -41,8 +44,10 @@ void main() {
     final body = jsonDecode(sent.body) as Map<String, dynamic>;
     expect(body.containsKey('provider'), isFalse);
     expect(body['instructions'], contains('kind habit coach'));
+    expect(body['instructions'], contains('Goal: walk.'));
     expect(body['messages'], [
-      {'role': 'user', 'content': contains('Goal: walk.')},
+      {'role': 'assistant', 'content': 'Hello'},
+      {'role': 'user', 'content': 'hi'},
     ]);
   });
 
@@ -57,7 +62,7 @@ void main() {
     final s = await client.chatReply(
       language: 'English',
       summary: '',
-      lastMessages: const [],
+      history: const [],
     );
     expect(s.text, 'Nice work');
     expect(s.wantsBigger, isTrue);
@@ -73,11 +78,7 @@ void main() {
         ),
       );
       await expectLater(
-        client.chatReply(
-          language: 'English',
-          summary: '',
-          lastMessages: const [],
-        ),
+        client.chatReply(language: 'English', summary: '', history: const []),
         throwsA(isA<AiException>().having((e) => e.code, 'code', entry.value)),
       );
     }
@@ -88,11 +89,7 @@ void main() {
       MockClient((_) async => throw http.ClientException('offline')),
     );
     await expectLater(
-      client.chatReply(
-        language: 'English',
-        summary: '',
-        lastMessages: const [],
-      ),
+      client.chatReply(language: 'English', summary: '', history: const []),
       throwsA(
         isA<AiException>().having((e) => e.code, 'code', 'no_connection'),
       ),

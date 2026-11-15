@@ -12,7 +12,7 @@ class _OfflineClient implements LlmClient {
   Future<AgentSuggestion> chatReply({
     required String language,
     required String summary,
-    required List<String> lastMessages,
+    required List<ChatTurn> history,
   }) => throw const AiException('no_connection');
 
   @override

@@ -8,7 +8,7 @@ class FakeLlmClient implements LlmClient {
   Future<AgentSuggestion> chatReply({
     required String language,
     required String summary,
-    required List<String> lastMessages,
+    required List<ChatTurn> history,
   }) async {
     return const AgentSuggestion(text: 'Thanks for telling me. Small steps.');
   }

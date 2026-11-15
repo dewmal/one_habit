@@ -20,15 +20,24 @@ class AiException implements Exception {
   String toString() => 'AiException($code)';
 }
 
+/// One chat message sent to the AI. [role] is 'user' or 'assistant'.
+class ChatTurn {
+  const ChatTurn({required this.role, required this.content});
+
+  final String role;
+  final String content;
+}
+
 /// The service boundary for every AI call. Screens and controllers use this,
 /// never http. Today [GatewayLlmClient] sends calls through the gateway. A
 /// local model later is a new class that implements this same interface.
 abstract class LlmClient {
-  /// A coach reply in the General chat.
+  /// A coach reply in the General chat. [history] ends with the user's
+  /// newest message.
   Future<AgentSuggestion> chatReply({
     required String language,
     required String summary,
-    required List<String> lastMessages,
+    required List<ChatTurn> history,
   });
 
   /// Tiny daily tasks for the user's level.

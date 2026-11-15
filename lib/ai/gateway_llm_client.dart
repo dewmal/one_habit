@@ -91,24 +91,20 @@ class GatewayLlmClient implements LlmClient {
   Future<AgentSuggestion> chatReply({
     required String language,
     required String summary,
-    required List<String> lastMessages,
+    required List<ChatTurn> history,
   }) async {
     final instructions =
         '''
 You are a kind habit coach. Reply in $language. Keep it under 3 short sentences.
 Never use guilt, pressure or urgency. Never give medical or diet advice.
+Context about the user: $summary
 Reply only with JSON like this:
 {"text": "your reply", "wants_bigger": false}
 Set wants_bigger to true only if you think the user is ready for a bigger step.
 ''';
 
     final raw = await _ask(instructions, [
-      {
-        'role': 'user',
-        'content':
-            'Summary: $summary\n\nLast messages:\n'
-            '${lastMessages.join('\n')}',
-      },
+      for (final turn in history) {'role': turn.role, 'content': turn.content},
     ]);
     final json = _readJson(raw);
 
