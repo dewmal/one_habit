@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app/app_state.dart';
+import '../app/dummy_data.dart';
 import '../app/rules.dart';
 import '../i18n/language.dart';
 import '../plugins/fitness_plugin.dart';
@@ -13,6 +14,23 @@ class ChatReply {
   final Map<AppLanguage, String> label;
 }
 
+/// A fixed card shown inside a bubble. The AI only chooses the card and fills words.
+sealed class ChatCard {
+  const ChatCard();
+}
+
+class LevelCardData extends ChatCard {
+  const LevelCardData({
+    required this.level,
+    required this.steps,
+    required this.healthLock,
+  });
+
+  final String level;
+  final List<String> steps;
+  final bool healthLock;
+}
+
 /// One bubble. Text is kept for every language so the chat re-translates
 /// when the user switches language.
 class ChatMessage {
@@ -22,6 +40,7 @@ class ChatMessage {
     required this.text,
     this.questionLabel,
     this.replies = const [],
+    this.card,
   });
 
   final int id;
@@ -29,6 +48,15 @@ class ChatMessage {
   final Map<AppLanguage, String> text;
   final Map<AppLanguage, String>? questionLabel;
   final List<ChatReply> replies;
+  final ChatCard? card;
+
+  ChatMessage withoutCard() => ChatMessage(
+    id: id,
+    fromAgent: fromAgent,
+    text: text,
+    questionLabel: questionLabel,
+    replies: const [],
+  );
 }
 
 enum OnboardingStep { askGoal, questions, healthCheck, levelPlan }
@@ -41,6 +69,8 @@ class ChatState {
     this.answers = const {},
     this.goal,
     this.healthAnswers = const [],
+    this.level,
+    this.steps = const [],
   });
 
   final List<ChatMessage> messages;
@@ -59,6 +89,12 @@ class ChatState {
   /// Any "Yes" locks the plan to the gentlest level.
   bool get healthLock => healthAnswers.any((yes) => yes);
 
+  /// The starting level the user agreed to (beginner, building or ready).
+  final String? level;
+
+  /// Tomorrow's small steps for the agreed level.
+  final List<String> steps;
+
   ChatState copyWith({
     List<ChatMessage>? messages,
     OnboardingStep? step,
@@ -66,6 +102,8 @@ class ChatState {
     Map<String, String>? answers,
     String? goal,
     List<bool>? healthAnswers,
+    String? level,
+    List<String>? steps,
   }) => ChatState(
     messages: messages ?? this.messages,
     step: step ?? this.step,
@@ -73,6 +111,8 @@ class ChatState {
     answers: answers ?? this.answers,
     goal: goal ?? this.goal,
     healthAnswers: healthAnswers ?? this.healthAnswers,
+    level: level ?? this.level,
+    steps: steps ?? this.steps,
   );
 }
 
@@ -93,12 +133,14 @@ class ChatController extends Notifier<ChatState> {
     Map<AppLanguage, String> text, {
     Map<AppLanguage, String>? questionLabel,
     List<ChatReply> replies = const [],
+    ChatCard? card,
   }) => ChatMessage(
     id: _seq++,
     fromAgent: true,
     text: filterOutgoing(text),
     questionLabel: questionLabel,
     replies: replies,
+    card: card,
   );
 
   void _append(ChatMessage message) =>
@@ -124,6 +166,37 @@ class ChatController extends Notifier<ChatState> {
       ),
     );
   }
+
+  /// Shows the level card with the steps for the current level.
+  void _showLevelCard() {
+    final level = _placeLevel();
+    final steps = state.steps.isEmpty ? dummyStepsFor(level) : state.steps;
+    state = state.copyWith(level: level, steps: steps);
+    // The newest level card replaces the older one, so only one plan shows.
+    state = state.copyWith(
+      messages: [
+        for (final m in state.messages)
+          m.card is LevelCardData ? m.withoutCard() : m,
+      ],
+    );
+    _append(
+      _agent(
+        textOf('level.intro'),
+        replies: [
+          ChatReply(value: 'looks_good', label: textOf('level.looks_good')),
+          ChatReply(value: 'smaller', label: textOf('level.smaller')),
+        ],
+        card: LevelCardData(
+          level: level,
+          steps: steps,
+          healthLock: state.healthLock,
+        ),
+      ),
+    );
+  }
+
+  String _placeLevel() =>
+      placeLevel(fitnessPlugin, state.answers, healthLock: state.healthLock);
 
   /// The user typed text, or tapped a quick reply (pass [reply]).
   void send(String raw, {ChatReply? reply}) {
@@ -163,8 +236,25 @@ class ChatController extends Notifier<ChatState> {
           _say(textOf('chat.health_next'));
         }
       case OnboardingStep.healthCheck:
-      case OnboardingStep.levelPlan:
         break;
+      case OnboardingStep.levelPlan:
+        _levelReply(reply);
+    }
+  }
+
+  void _levelReply(ChatReply? reply) {
+    switch (reply?.value) {
+      case 'looks_good':
+        // Saves the plan and moves to Today. Saving to the database comes later.
+        ref.read(appProvider.notifier).finishOnboarding();
+      case 'smaller':
+        // Smaller steps need no extra check: keep only the first step.
+        final smaller = state.steps.take(1).toList();
+        state = state.copyWith(steps: smaller);
+        _say(textOf('level.smaller_ack'));
+        _showLevelCard();
+      default:
+        _say(textOf('chat.noted'));
     }
   }
 
@@ -175,7 +265,7 @@ class ChatController extends Notifier<ChatState> {
       healthAnswers: answers,
       step: OnboardingStep.levelPlan,
     );
-    _say(textOf('chat.here_is_start'));
+    _showLevelCard();
   }
 }
 

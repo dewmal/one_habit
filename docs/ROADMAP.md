@@ -99,15 +99,15 @@ These are not code. Each one blocks a specific day, so write them before that da
 
 ### Thu Nov 19 — Level placement and plan (screen 4)
 
-- [ ] Place the user: Beginner, Building or Ready
+- [x] Place the user: Beginner, Building or Ready
 - [ ] Load the 5 stages from the fixed gym template into the plan table, with the current stage
 - [ ] AI writes only today's and tomorrow's tiny tasks for the current stage, through the gateway
-- [ ] `BlushCard` base component for all interactive cards
-- [ ] Level card: three levels with one highlighted, then tomorrow's small steps
-- [ ] The AI picks a card and fills the words only. It never sends layout or code
-- [ ] Quick replies "Looks good" and "Make it smaller"
+- [x] `BlushCard` base component for all interactive cards
+- [x] Level card: three levels with one highlighted, then tomorrow's small steps
+- [x] The AI picks a card and fills the words only. It never sends layout or code
+- [x] Quick replies "Looks good" and "Make it smaller"
 - [ ] "Looks good" saves the plan and opens Today with the bottom nav
-- [ ] "Make it smaller" asks for smaller steps and shows the card again, with no extra check
+- [x] "Make it smaller" asks for smaller steps and shows the card again, with no extra check
 - [ ] Write the level to the habit table
 
 **Done when:** a Beginner gets a few tiny tasks, a Ready person starts near the real habit.
@@ -118,7 +118,7 @@ These are not code. Each one blocks a specific day, so write them before that da
 - [ ] Rule: health lock. Any Yes forces the gentlest level whatever the AI suggests `[never cut]`
 - [ ] Rule: no-shame blocklist on every outgoing message `[never cut]`
 - [ ] Rules tests for the health lock and the blocklist
-- [ ] `InfoCard` with the fixed "see a doctor" note, shown on screen 4 when the health lock is on
+- [x] `InfoCard` with the fixed "see a doctor" note, shown on screen 4 when the health lock is on
 - [ ] **Screen 5 Today:** title with project name, settings icon, stage card ("Stage 1 of 5", stage name, one calm line), task checklist, "Log how it went" button
 - [ ] `TaskTile`: a tick writes to the daily log with no AI call
 - [ ] Today works fully offline from saved data

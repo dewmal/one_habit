@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../chat/chat_controller.dart';
+import '../components/info_card.dart';
+import '../components/level_card.dart';
+import '../plugins/fitness_plugin.dart';
 import '../components/chat_bubbles.dart';
 import '../components/chat_header.dart';
 import '../components/input_bar.dart';
@@ -90,20 +93,43 @@ class ChatPage extends ConsumerWidget {
   Widget _message(ChatMessage message, AppLanguage language) {
     final text = resolve(message.text, language);
     if (!message.fromAgent) return UserBubble(text: text);
-    return AgentBubble(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (message.questionLabel != null) ...[
-            Text(
-              resolve(message.questionLabel!, language),
-              style: AppText.smallLabel,
-            ),
-            const SizedBox(height: 4),
+    final card = message.card;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AgentBubble(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (message.questionLabel != null) ...[
+                Text(
+                  resolve(message.questionLabel!, language),
+                  style: AppText.smallLabel,
+                ),
+                const SizedBox(height: 4),
+              ],
+              Text(text, style: AppText.body),
+            ],
+          ),
+        ),
+        if (card is LevelCardData) ...[
+          const SizedBox(height: AppSpacing.gap8),
+          LevelCard(
+            levelLabels: {
+              for (final level in fitnessPlugin.levels)
+                level.id: resolve(level.label, language),
+            },
+            selected: card.level,
+            levelHeading: tr('level.heading', language),
+            stepsHeading: tr('level.steps_heading', language),
+            steps: card.steps,
+          ),
+          if (card.healthLock) ...[
+            const SizedBox(height: AppSpacing.gap8),
+            InfoCard(text: tr('level.gentle_note', language)),
           ],
-          Text(text, style: AppText.body),
         ],
-      ),
+      ],
     );
   }
 }

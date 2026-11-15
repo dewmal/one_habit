@@ -43,7 +43,6 @@ const Map<String, Map<AppLanguage, String>> _strings = {
   'chat.question_label': {AppLanguage.en: 'Question {n} of {total}'},
   'chat.health_next': {AppLanguage.en: 'Thanks. Next, a quick health check.'},
   'chat.noted': {AppLanguage.en: 'Noted.'},
-  'chat.here_is_start': {AppLanguage.en: 'Thanks. Here is where we start.'},
   'health.title': {AppLanguage.en: 'Quick health check'},
   'health.question_label': {AppLanguage.en: 'Question {n} of {total}'},
   'health.no': {AppLanguage.en: 'No'},
@@ -55,6 +54,15 @@ const Map<String, Map<AppLanguage, String>> _strings = {
     AppLanguage.en: "Let's take it one small step at a time.",
   },
   'chat.input_hint': {AppLanguage.en: 'Type a message'},
+  'level.intro': {AppLanguage.en: 'Thanks. Here is where we start.'},
+  'level.heading': {AppLanguage.en: 'Your starting level'},
+  'level.steps_heading': {AppLanguage.en: "Tomorrow's small steps"},
+  'level.looks_good': {AppLanguage.en: 'Looks good'},
+  'level.smaller': {AppLanguage.en: 'Make it smaller'},
+  'level.smaller_ack': {AppLanguage.en: 'Okay, I will make the steps smaller.'},
+  'level.gentle_note': {
+    AppLanguage.en: 'You said yes to a health question, so I will keep things gentle. Please see a doctor before doing more.',
+  },
 };
 
 /// Looks up a string key in the given language.
