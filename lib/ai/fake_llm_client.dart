@@ -1,6 +1,8 @@
+import '../app/dummy_data.dart';
 import 'llm_client.dart';
 
 /// Fixed answers, no network. Used in tests and when no gateway URL is set.
+/// Tasks come from the same fixed steps the app uses when the AI is unavailable.
 class FakeLlmClient implements LlmClient {
   @override
   Future<AgentSuggestion> chatReply({
@@ -17,6 +19,6 @@ class FakeLlmClient implements LlmClient {
     required String level,
     required String taskGuide,
   }) async {
-    return ['Put on your shoes', 'Walk for 2 minutes'];
+    return dummyStepsFor(level);
   }
 }

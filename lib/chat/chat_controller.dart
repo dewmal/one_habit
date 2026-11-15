@@ -210,10 +210,12 @@ class ChatController extends Notifier<ChatState> {
     );
   }
 
-  /// Shows the level card with the steps for the current level.
-  void _showLevelCard() {
+  /// Shows the level card with the steps for the current level. The AI writes
+  /// the tiny steps through the gateway. If that fails, the fixed steps for the
+  /// level are shown, so the plan never waits on the network.
+  Future<void> _showLevelCard() async {
     final level = _placeLevel();
-    final steps = state.steps.isEmpty ? dummyStepsFor(level) : state.steps;
+    final steps = state.steps.isEmpty ? await _writeSteps(level) : state.steps;
     state = state.copyWith(level: level, steps: steps);
     // The newest level card replaces the older one, so only one plan shows.
     state = state.copyWith(
@@ -389,6 +391,30 @@ class ChatController extends Notifier<ChatState> {
     } catch (_) {
       _say(textOf('chat.no_connection'));
     }
+  }
+
+  /// Asks the AI for today's and tomorrow's tiny steps. Blocked wording is
+  /// dropped. Any failure falls back to the fixed steps for the level.
+  Future<List<String>> _writeSteps(String level) async {
+    try {
+      final tasks = await ref
+          .read(llmProvider)
+          .writeTasks(
+            language: _languageName(),
+            level: level,
+            taskGuide: fitnessPlugin.taskGuide,
+          );
+      final safe = [
+        for (final t in tasks)
+          if (!isBlocked(t)) t,
+      ];
+      if (safe.isNotEmpty) return safe;
+    } on AiException catch (e) {
+      _say(_errorText(e.code));
+    } catch (_) {
+      _say(textOf('chat.no_connection'));
+    }
+    return dummyStepsFor(level);
   }
 
   String _languageName() =>
