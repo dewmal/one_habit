@@ -54,8 +54,8 @@ These are not code. Each one blocks a specific day, so write them before that da
 - [x] Add the fonts: Poppins, and Noto Sans Sinhala for Sinhala text
 - [x] Set up English and Sinhala text switching so a language tap changes all text at once
 - [x] Replace the counter demo in `lib/main.dart` with an empty app shell
-- [ ] Add the encrypted SQLite database
-- [ ] Create tables: profile, habit, plan, daily log, plus chat history (see the open decision)
+- [x] Add the encrypted SQLite database
+- [x] Create tables: profile, habit, plan, daily log, plus chat history (see the open decision)
 - [ ] Define the plugin and project shape as data: name, icon, colour, description, levels and placement questions, stages and move-on rule, task-writing guide, optional safety check, cards used
 - [ ] Create the Fitness plugin as a data file. No screen code may say "gym"
 - [ ] Run the app on a real Android phone
