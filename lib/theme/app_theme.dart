@@ -104,9 +104,14 @@ class AppText {
   static const navLabel = TextStyle(fontSize: 11);
 }
 
+const sansFamily = 'Poppins';
+const sinhalaFamily = 'NotoSansSinhala';
+
 ThemeData buildAppTheme() {
   return ThemeData(
     useMaterial3: true,
+    fontFamily: sansFamily,
+    fontFamilyFallback: const [sinhalaFamily],
     brightness: Brightness.dark,
     scaffoldBackgroundColor: AppColors.bg,
     colorScheme: const ColorScheme.dark(
@@ -122,6 +127,6 @@ ThemeData buildAppTheme() {
       titleMedium: AppText.cardTitle,
       bodyMedium: AppText.body,
       labelSmall: AppText.smallLabel,
-    ),
+    ).apply(fontFamily: sansFamily, fontFamilyFallback: const [sinhalaFamily]),
   );
 }
