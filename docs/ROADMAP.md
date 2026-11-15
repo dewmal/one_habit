@@ -70,11 +70,11 @@ These are not code. Each one blocks a specific day, so write them before that da
 - [ ] Add the per-device rate limit
 - [ ] Add Android app-check
 - [ ] Set the spending cap on the AI account
-- [ ] Phone-side gateway client. The app contains no secrets
-- [ ] Request builder that sends only a short summary and the last few messages of the open chat (Spec section 6)
+- [x] Phone-side gateway client. The app contains no secrets
+- [x] Request builder that sends only a short summary and the last few messages of the open chat (Spec section 6)
 - [x] Chat page base: `ChatHeader` ("General", "Your coach · AI"), `AgentBubble`, `UserBubble`, `InputBar`
 - [ ] Save chat messages to the phone
-- [ ] Plain "no connection, try again" message when the gateway cannot be reached
+- [x] Plain "no connection, try again" message when the gateway cannot be reached
 
 **Done when:** chat works from the phone, nothing is stored on the gateway.
 

@@ -1,5 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../ai/fake_llm_client.dart';
+import '../ai/gateway_llm_client.dart';
+import '../ai/llm_client.dart';
 import '../app/app_state.dart';
 import '../app/day_state.dart';
 import '../app/dummy_data.dart';
@@ -358,6 +361,48 @@ class ChatController extends Notifier<ChatState> {
     }
   }
 
+  /// Asks the AI for a coach reply. The rules engine still has the final say.
+  Future<void> _coachReply() async {
+    // Send only the last few messages, as the privacy rule says.
+    final recent = state.messages.reversed.take(6).toList().reversed;
+    final lastMessages = [
+      for (final m in recent)
+        '${m.fromAgent ? 'Coach' : 'User'}: ${m.text[AppLanguage.en]}',
+    ];
+
+    try {
+      final suggestion = await ref
+          .read(llmProvider)
+          .chatReply(
+            language: _languageName(),
+            summary: 'Goal: ${state.goal ?? ''}. Level: ${state.level ?? ''}.',
+            lastMessages: lastMessages,
+          );
+
+      // _say goes through filterOutgoing, so blocked words never show.
+      _say({AppLanguage.en: suggestion.text, AppLanguage.si: suggestion.text});
+
+      // The AI may only suggest. The step-up card asks the user first.
+      if (suggestion.wantsBigger) openStepUp();
+    } on AiException catch (e) {
+      _say(_errorText(e.code));
+    } catch (_) {
+      _say(textOf('chat.no_connection'));
+    }
+  }
+
+  String _languageName() =>
+      ref.read(languageProvider) == AppLanguage.si ? 'Sinhala' : 'English';
+
+  /// A calm message for each gateway code. Raw codes and provider text never
+  /// reach the screen.
+  Map<AppLanguage, String> _errorText(String code) => switch (code) {
+    'no_connection' => textOf('chat.no_connection'),
+    'rate_limited' => textOf('chat.rate_limited'),
+    'too_large' => textOf('chat.too_large'),
+    _ => textOf('chat.try_again'),
+  };
+
   /// The user typed text, or tapped a quick reply (pass [reply]).
   void send(String raw, {ChatReply? reply}) {
     final text = raw.trim();
@@ -386,7 +431,7 @@ class ChatController extends Notifier<ChatState> {
       if (reply?.value == 'okay' || reply?.value == 'still_too_much') {
         _missedReply(reply);
       } else {
-        _say(textOf('chat.noted'));
+        _coachReply();
       }
       return;
     }
@@ -448,4 +493,15 @@ class ChatController extends Notifier<ChatState> {
 
 final chatProvider = NotifierProvider<ChatController, ChatState>(
   ChatController.new,
+);
+
+/// The gateway URL comes from the build: --dart-define=GATEWAY_URL=https://...
+/// Without it, the app uses fixed answers, so tests and offline runs never
+/// touch the network. Tests can also override this with FakeLlmClient.
+const _gatewayUrl = String.fromEnvironment('GATEWAY_URL');
+
+final llmProvider = Provider<LlmClient>(
+  (ref) => _gatewayUrl.isEmpty
+      ? FakeLlmClient()
+      : GatewayLlmClient(gatewayUrl: _gatewayUrl),
 );

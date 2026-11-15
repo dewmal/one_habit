@@ -43,6 +43,22 @@ const Map<String, Map<AppLanguage, String>> _strings = {
   'chat.question_label': {AppLanguage.en: 'Question {n} of {total}'},
   'chat.health_next': {AppLanguage.en: 'Thanks. Next, a quick health check.'},
   'chat.noted': {AppLanguage.en: 'Noted.'},
+  'chat.no_connection': {
+    AppLanguage.en: 'No connection. Please try again.',
+    AppLanguage.si: 'සම්බන්ධතාවයක් නැත. නැවත උත්සාහ කරන්න.',
+  },
+  'chat.rate_limited': {
+    AppLanguage.en: "Let's take a short break. Come back in a little while.",
+    AppLanguage.si: 'මදක් විවේක ගනිමු. ටික වෙලාවකින් ආපසු එන්න.',
+  },
+  'chat.too_large': {
+    AppLanguage.en: 'That was too much at once. Try a shorter message.',
+    AppLanguage.si: 'එකවර වැඩියි. කෙටි පණිවිඩයක් උත්සාහ කරන්න.',
+  },
+  'chat.try_again': {
+    AppLanguage.en: 'Let us try again in a moment.',
+    AppLanguage.si: 'මොහොතකින් නැවත උත්සාහ කරමු.',
+  },
   'health.title': {AppLanguage.en: 'Quick health check'},
   'health.question_label': {AppLanguage.en: 'Question {n} of {total}'},
   'health.no': {AppLanguage.en: 'No'},
