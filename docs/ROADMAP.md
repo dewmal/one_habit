@@ -72,7 +72,7 @@ These are not code. Each one blocks a specific day, so write them before that da
 - [ ] Set the spending cap on the AI account
 - [ ] Phone-side gateway client. The app contains no secrets
 - [ ] Request builder that sends only a short summary and the last few messages of the open chat (Spec section 6)
-- [ ] Chat page base: `ChatHeader` ("General", "Your coach · AI"), `AgentBubble`, `UserBubble`, `InputBar`
+- [x] Chat page base: `ChatHeader` ("General", "Your coach · AI"), `AgentBubble`, `UserBubble`, `InputBar`
 - [ ] Save chat messages to the phone
 - [ ] Plain "no connection, try again" message when the gateway cannot be reached
 
@@ -85,8 +85,8 @@ These are not code. Each one blocks a specific day, so write them before that da
 - [ ] Welcome writes the language to the profile table and shows only on first run
 - [ ] **Screen 2 First questions:** General chat in onboarding mode, no bottom nav
 - [ ] User types the goal in their own words, saved to the habit table
-- [ ] Agent asks up to 5 questions, never more, with a "Question 2 of 5" label in the bubble
-- [ ] `QuickReplies` component: a tap is sent as the user's answer
+- [x] Agent asks up to 5 questions, never more, with a "Question 2 of 5" label in the bubble
+- [x] `QuickReplies` component: a tap is sent as the user's answer
 - [ ] Each answer saved to the habit table
 - [ ] **Screen 3 Health check:** 3 to 4 fixed yes/no screens, plain code with no AI `[never cut]`
 - [ ] Back button, "Question 2 of 4" with a progress bar, large question, No and Yes buttons, one reassuring line

@@ -37,24 +37,36 @@ class HabitPlugin {
 
   /// Optional safety check. Null means no check.
   final HealthCheck? healthCheck;
-
-  String nameIn(AppLanguage language) =>
-      name[language] ?? name[AppLanguage.en] ?? id;
 }
 
 class HabitLevel {
   const HabitLevel({required this.id, required this.label});
 
-  /// Beginner, building or ready. Also the value stored in the habit table.
+  /// beginner, building or ready. Also the value stored in the habit table.
   final String id;
   final Map<AppLanguage, String> label;
 }
 
 class PlacementQuestion {
-  const PlacementQuestion({required this.id, required this.text});
+  const PlacementQuestion({
+    required this.id,
+    required this.text,
+    required this.options,
+  });
 
   final String id;
   final Map<AppLanguage, String> text;
+  final List<PlacementOption> options;
+}
+
+class PlacementOption {
+  const PlacementOption({required this.id, required this.label, this.level});
+
+  final String id;
+  final Map<AppLanguage, String> label;
+
+  /// The starting level this answer points to, if it places the user.
+  final String? level;
 }
 
 class HabitStage {

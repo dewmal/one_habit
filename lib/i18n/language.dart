@@ -18,8 +18,9 @@ final languageProvider = NotifierProvider<LanguageController, AppLanguage>(
   LanguageController.new,
 );
 
-/// Placeholder strings. Sinhala values are stand-ins until the native
-/// speaker review. Screens read text through [tr], never inline literals.
+/// Placeholder strings. Only English is written so far: a missing Sinhala
+/// value falls back to English until the Sinhala text is written (Fri Nov 27).
+/// Screens read text through [tr] or [textOf], never inline literals.
 const Map<String, Map<AppLanguage, String>> _strings = {
   'app.name': {AppLanguage.en: 'Habit Agent', AppLanguage.si: 'Habit Agent'},
   'lang.label': {AppLanguage.en: 'English', AppLanguage.si: 'සිංහල'},
@@ -32,6 +33,20 @@ const Map<String, Map<AppLanguage, String>> _strings = {
         "I'm an AI coach, not a person. What you tell me stays on this phone.",
   },
   'welcome.start': {AppLanguage.en: 'Start'},
+  'chat.general': {AppLanguage.en: 'General'},
+  'chat.coach': {AppLanguage.en: 'Your coach · AI'},
+  'chat.greeting': {AppLanguage.en: 'Hi! What habit would you like to build?'},
+  'chat.good_goal': {
+    AppLanguage.en:
+        'Good goal. A few short questions so the first step fits you.',
+  },
+  'chat.question_label': {AppLanguage.en: 'Question {n} of {total}'},
+  'chat.health_next': {AppLanguage.en: 'Thanks. Next, a quick health check.'},
+  'chat.noted': {AppLanguage.en: 'Noted.'},
+  'chat.safe_fallback': {
+    AppLanguage.en: "Let's take it one small step at a time.",
+  },
+  'chat.input_hint': {AppLanguage.en: 'Type a message'},
 };
 
 /// Looks up a string key in the given language.
@@ -41,3 +56,23 @@ String tr(String key, AppLanguage language) {
   if (entry == null) return key;
   return entry[language] ?? entry[AppLanguage.en] ?? key;
 }
+
+/// All languages of a key, with {placeholders} filled in. Used where text must
+/// stay correct after the user switches language (chat history).
+Map<AppLanguage, String> textOf(
+  String key, [
+  Map<String, String> params = const {},
+]) {
+  final base = _strings[key] ?? {AppLanguage.en: key};
+  return base.map((language, value) {
+    var filled = value;
+    params.forEach((name, replacement) {
+      filled = filled.replaceAll('{$name}', replacement);
+    });
+    return MapEntry(language, filled);
+  });
+}
+
+/// Picks the text for [language], falling back to English.
+String resolve(Map<AppLanguage, String> text, AppLanguage language) =>
+    text[language] ?? text[AppLanguage.en] ?? '';

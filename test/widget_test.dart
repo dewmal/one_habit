@@ -5,8 +5,9 @@ import 'package:one_preccent/i18n/language.dart';
 import 'package:one_preccent/main.dart';
 
 void main() {
-  testWidgets('app shell shows the app name and follows the language',
-      (WidgetTester tester) async {
+  testWidgets('app shell shows the app name and follows the language', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const ProviderScope(child: HabitAgentApp()));
     expect(find.text('Habit Agent'), findsOneWidget);
 

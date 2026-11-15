@@ -98,8 +98,7 @@ class AppDatabase {
     'chat_history',
   ];
 
-  Future<List<Map<String, Object?>>> rows(String table) =>
-      _db.query(table);
+  Future<List<Map<String, Object?>>> rows(String table) => _db.query(table);
 
   Future<void> close() => _db.close();
 }

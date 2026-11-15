@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../screens/chat_page.dart';
 import '../screens/welcome_page.dart';
 import 'app_state.dart';
 
@@ -16,8 +17,8 @@ class AppRoot extends ConsumerWidget {
         return const WelcomePage();
       case AppPhase.onboarding:
       case AppPhase.main:
-        // The chat page replaces this in the next screen commit.
-        return const Scaffold(body: Center(child: Text('General')));
+        // The bottom nav joins in the Today screen commit.
+        return const ChatPage();
     }
   }
 }
