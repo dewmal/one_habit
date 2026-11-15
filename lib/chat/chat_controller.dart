@@ -94,14 +94,6 @@ class ChatMessage {
     questionLabel: questionLabel,
     replies: const [],
   );
-
-  ChatMessage withoutReplies() => ChatMessage(
-    id: id,
-    fromAgent: fromAgent,
-    text: text,
-    questionLabel: questionLabel,
-    card: card,
-  );
 }
 
 enum OnboardingStep { askGoal, questions, healthCheck, levelPlan }
@@ -165,6 +157,9 @@ class ChatState {
 class ChatController extends Notifier<ChatState> {
   int _seq = 0;
 
+  /// The last queued user message. Each one waits for the one before it.
+  Future<void> _turn = Future.value();
+
   @override
   ChatState build() => _initial();
 
@@ -198,20 +193,6 @@ class ChatController extends Notifier<ChatState> {
       state = state.copyWith(messages: [...state.messages, message]);
 
   void _say(Map<AppLanguage, String> text) => _append(_agent(text));
-
-  /// A coach line from the gateway. Quick replies only show under the newest
-  /// agent bubble, so the open buttons move to this bubble and stay tappable.
-  void _sayCoach(Map<AppLanguage, String> text) {
-    final agents = state.messages.where((m) => m.fromAgent).toList();
-    final open = agents.isEmpty ? const <ChatReply>[] : agents.last.replies;
-    state = state.copyWith(
-      messages: [
-        for (final m in state.messages)
-          m.replies.isEmpty ? m : m.withoutReplies(),
-      ],
-    );
-    _append(_agent(text, replies: open));
-  }
 
   int get _placementCount => fitnessPlugin.placementQuestions.length;
 
@@ -401,28 +382,34 @@ class ChatController extends Notifier<ChatState> {
       history.removeAt(0);
     }
 
+    AgentSuggestion? suggestion;
+    Map<AppLanguage, String>? failure;
     try {
-      final suggestion = await ref
+      suggestion = await ref
           .read(llmProvider)
           .chatReply(
             language: _languageName(),
             summary: 'Goal: ${state.goal ?? ''}. Level: ${state.level ?? ''}.',
             history: history,
           );
-
-      // _say goes through filterOutgoing, so blocked words never show.
-      _sayCoach({
-        AppLanguage.en: suggestion.text,
-        AppLanguage.si: suggestion.text,
-      });
-
-      // The AI may only suggest. The step-up card asks the user first.
-      if (suggestion.wantsBigger) openStepUp();
     } on AiException catch (e) {
-      _sayCoach(_errorText(e.code));
+      failure = _errorText(e.code);
     } catch (_) {
-      _sayCoach(textOf('chat.no_connection'));
+      failure = textOf('chat.no_connection');
     }
+
+    // A hard stop that came in while waiting wins: nothing more is shown.
+    if (ref.read(dayProvider).paused) return;
+
+    if (suggestion == null) {
+      _say(failure!);
+      return;
+    }
+    // _say goes through filterOutgoing, so blocked words never show.
+    _say({AppLanguage.en: suggestion.text, AppLanguage.si: suggestion.text});
+
+    // The AI may only suggest. The step-up card asks the user first.
+    if (suggestion.wantsBigger) openStepUp();
   }
 
   /// Asks the AI for today's and tomorrow's tiny steps. Blocked wording is
@@ -485,10 +472,15 @@ class ChatController extends Notifier<ChatState> {
       return;
     }
 
-    // Every other message goes to the gateway for the coach's reply. The
-    // history is read now, so it ends with this message. The fixed steps
-    // below still decide what the app does next.
-    _coachReply();
+    // Messages are answered one at a time, in order. The next screen is built
+    // only after the gateway has answered.
+    _turn = _turn.then((_) => _respond(text, reply));
+  }
+
+  /// One user message: ask the gateway first, then build the next screen.
+  Future<void> _respond(String text, ChatReply? reply) async {
+    await _coachReply();
+    if (ref.read(dayProvider).paused) return;
 
     if (ref.read(appProvider).phase != AppPhase.onboarding) {
       if (reply?.value == 'okay' || reply?.value == 'still_too_much') {

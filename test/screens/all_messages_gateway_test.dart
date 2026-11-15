@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -61,4 +63,55 @@ void main() {
     expect(client.calls.last.last.content, 'Most days');
     expect(client.calls.last.first.role, 'user');
   });
+
+  testWidgets('the next question waits until the gateway has answered', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390 * 3, 844 * 3);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+
+    final gate = Completer<AgentSuggestion>();
+    final client = _GatedClient(gate.future);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [llmProvider.overrideWithValue(client)],
+        child: const HabitAgentApp(),
+      ),
+    );
+    await tester.tap(find.text('Start'));
+    await tester.pump();
+    await tester.enterText(find.byType(TextField), 'Gym every day');
+    await tester.tap(find.byIcon(Icons.arrow_forward));
+    await tester.pump();
+
+    // The gateway has not answered yet, so the next question is not built.
+    expect(find.text('Question 2 of 5'), findsNothing);
+
+    gate.complete(const AgentSuggestion(text: 'Nice goal.'));
+    await tester.pumpAndSettle();
+    expect(find.text('Nice goal.'), findsOneWidget);
+    expect(find.text('Question 2 of 5'), findsOneWidget);
+  });
+}
+
+/// Answers coach calls only when [answer] completes.
+class _GatedClient implements LlmClient {
+  _GatedClient(this.answer);
+
+  final Future<AgentSuggestion> answer;
+
+  @override
+  Future<AgentSuggestion> chatReply({
+    required String language,
+    required String summary,
+    required List<ChatTurn> history,
+  }) => answer;
+
+  @override
+  Future<List<String>> writeTasks({
+    required String language,
+    required String level,
+    required String taskGuide,
+  }) async => const ['Put on shoes'];
 }
