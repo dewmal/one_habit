@@ -69,6 +69,21 @@ const Map<String, Map<AppLanguage, String>> _strings = {
   },
   'today.log_button': {AppLanguage.en: 'Log how it went'},
   'plan.title': {AppLanguage.en: 'Plan'},
+  // Fixed step-up question. Wording needs approval (due Tue Nov 24).
+  'stepup.question': {AppLanguage.en: 'Ready for a bit more?'},
+  'stepup.reason': {
+    AppLanguage.en:
+        'You did your steps five days in a row and said they felt easy.',
+  },
+  'stepup.now': {AppLanguage.en: 'Now: {step}'},
+  'stepup.bigger': {AppLanguage.en: 'A bit more: {step}'},
+  'stepup.yes': {AppLanguage.en: 'Yes'},
+  'stepup.not_yet': {AppLanguage.en: 'Not yet'},
+  'stepup.nothing_changes': {
+    AppLanguage.en: 'Nothing changes unless you say yes.',
+  },
+  'stepup.yes_ack': {AppLanguage.en: 'Done. The bigger step starts tomorrow.'},
+  'stepup.not_yet_ack': {AppLanguage.en: 'No problem. Nothing changed.'},
   // Fixed phrase for a missed day. Wording needs approval (due Tue Nov 24).
   'missed.phrase': {
     AppLanguage.en:

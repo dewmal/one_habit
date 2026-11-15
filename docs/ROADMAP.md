@@ -171,8 +171,8 @@ These are not code. Each one blocks a specific day, so write them before that da
 - [ ] **Screen 7 After missed days:** fixed missed-day phrase, short agent message, task card with a "Smaller" tag and a "Was: 3 steps. Now: 1 step." line
 - [x] Quick replies "Okay" (accept) and "Still too much" (smaller again)
 - [ ] Use the gateway only if the tasks need rewriting
-- [ ] **Screen 8 Step-up offer** `[cut 4]`, build after screen 7: fixed question on a sunset header, "Now" and "A bit more" lines, Yes and Not yet, the line "Nothing changes unless you say yes."
-- [ ] Yes applies the bigger task from tomorrow. Not yet changes nothing. The plan is written only after Yes
+- [x] **Screen 8 Step-up offer** `[cut 4]`, build after screen 7: fixed question on a sunset header, "Now" and "A bit more" lines, Yes and Not yet, the line "Nothing changes unless you say yes."
+- [x] Yes applies the bigger task from tomorrow. Not yet changes nothing. The plan is written only after Yes
 
 **Done when:** rules tests pass 100%.
 

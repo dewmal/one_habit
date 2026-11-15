@@ -75,3 +75,7 @@ final dummyGoal = dummyText('go to the gym every day');
 /// The smaller step shown after missed days (dummy).
 const dummySmallestStep = 'Put on your gym shoes';
 const dummyTinierStep = 'Put on one shoe';
+
+/// The bigger step offered after a steady run (dummy).
+const dummyNowStep = 'Stay for 5 minutes';
+const dummyBiggerStep = 'Stay for 10 minutes';

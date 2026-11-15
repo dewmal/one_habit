@@ -6,6 +6,7 @@ import '../chat/chat_controller.dart';
 import '../components/info_card.dart';
 import '../components/log_card.dart';
 import '../components/missed_card.dart';
+import '../components/step_up_card.dart';
 import '../components/level_card.dart';
 import '../plugins/fitness_plugin.dart';
 import '../components/chat_bubbles.dart';
@@ -120,6 +121,25 @@ class ChatPage extends ConsumerWidget {
             ],
           ),
         ),
+        if (card is StepUpCardData) ...[
+          const SizedBox(height: AppSpacing.gap8),
+          StepUpCard(
+            question: tr('stepup.question', language),
+            nowLine: resolve(
+              textOf('stepup.now', {'step': card.now}),
+              language,
+            ),
+            biggerLine: resolve(
+              textOf('stepup.bigger', {'step': card.bigger}),
+              language,
+            ),
+            yesLabel: tr('stepup.yes', language),
+            notYetLabel: tr('stepup.not_yet', language),
+            nothingChanges: tr('stepup.nothing_changes', language),
+            onYes: () => controller.answerStepUp(message.id, yes: true),
+            onNotYet: () => controller.answerStepUp(message.id, yes: false),
+          ),
+        ],
         if (card is MissedDayCardData) ...[
           const SizedBox(height: AppSpacing.gap8),
           MissedCard(
@@ -191,9 +211,11 @@ class _DemoMenu extends StatelessWidget {
       icon: const Icon(Icons.science_outlined, color: AppColors.textMuted),
       onSelected: (value) {
         if (value == 'missed') controller.openMissedDays();
+        if (value == 'stepup') controller.openStepUp();
       },
       itemBuilder: (_) => const [
         PopupMenuItem(value: 'missed', child: Text('Demo: missed days')),
+        PopupMenuItem(value: 'stepup', child: Text('Demo: step-up offer')),
       ],
     );
   }

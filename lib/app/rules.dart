@@ -41,3 +41,6 @@ String placeLevel(
   }
   return 'beginner';
 }
+
+/// A bigger step never happens without the user's yes.
+bool canStepUp({required bool userSaidYes}) => userSaidYes;

@@ -45,6 +45,14 @@ class MissedDayCardData extends ChatCard {
   final String step;
 }
 
+/// The step-up offer. Nothing changes unless the user says yes.
+class StepUpCardData extends ChatCard {
+  const StepUpCardData({required this.now, required this.bigger});
+
+  final String now;
+  final String bigger;
+}
+
 class LogCardData extends ChatCard {
   const LogCardData({required this.tasks, required this.initialResults});
 
@@ -242,6 +250,33 @@ class ChatController extends Notifier<ChatState> {
       ],
     );
     _say(textOf('log.saved_reply'));
+  }
+
+  /// The offer after a steady run. Shown only; the plan changes on a yes.
+  void openStepUp() {
+    if (ref.read(dayProvider).paused) return;
+    _append(
+      _agent(
+        textOf('stepup.reason'),
+        card: const StepUpCardData(now: dummyNowStep, bigger: dummyBiggerStep),
+      ),
+    );
+  }
+
+  /// Yes applies the bigger step from tomorrow. Not yet changes nothing.
+  void answerStepUp(int messageId, {required bool yes}) {
+    final allowed = canStepUp(userSaidYes: yes);
+    state = state.copyWith(
+      messages: [
+        for (final m in state.messages) m.id == messageId ? m.withoutCard() : m,
+      ],
+    );
+    if (allowed) {
+      state = state.copyWith(steps: [dummyBiggerStep]);
+      _say(textOf('stepup.yes_ack'));
+    } else {
+      _say(textOf('stepup.not_yet_ack'));
+    }
   }
 
   /// After missed days: the fixed phrase, then one smaller step.
