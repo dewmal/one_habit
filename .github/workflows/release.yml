@@ -1,8 +1,7 @@
-name: Release
+name: Android Release
 
 # Runs when a version tag such as v1.0.0 is pushed.
-# Builds the app for every desktop/mobile/web target and attaches
-# the artifacts to a GitHub Release created for that tag.
+# Builds the Android APK and AAB and attaches them to a GitHub Release for that tag.
 on:
   push:
     tags:
@@ -20,34 +19,21 @@ concurrency:
   group: release-${{ github.ref_name }}
   cancel-in-progress: false
 
-env:
-  FLUTTER_CHANNEL: stable
-
 jobs:
-  # Work out the tag and the version strings used by every build job.
-  prepare:
+  android:
     runs-on: ubuntu-latest
-    outputs:
-      tag: ${{ steps.meta.outputs.tag }}
-      version: ${{ steps.meta.outputs.version }}
-      build_number: ${{ steps.meta.outputs.build_number }}
     steps:
-      - id: meta
+      - name: Work out tag and version
+        id: meta
         run: |
           TAG="${{ github.event.inputs.tag || github.ref_name }}"
-          VERSION="${TAG#v}"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
           echo "build_number=${{ github.run_number }}" >> "$GITHUB_OUTPUT"
-          echo "Releasing $TAG (version $VERSION, build ${{ github.run_number }})"
 
-  android:
-    needs: prepare
-    runs-on: ubuntu-latest
-    steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ needs.prepare.outputs.tag }}
+          ref: ${{ steps.meta.outputs.tag }}
 
       - uses: actions/setup-java@v4
         with:
@@ -56,7 +42,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          channel: ${{ env.FLUTTER_CHANNEL }}
+          channel: stable
           cache: true
 
       - run: flutter pub get
@@ -64,186 +50,27 @@ jobs:
       - name: Build APK
         run: >
           flutter build apk --release
-          --build-name=${{ needs.prepare.outputs.version }}
-          --build-number=${{ needs.prepare.outputs.build_number }}
+          --build-name=${{ steps.meta.outputs.version }}
+          --build-number=${{ steps.meta.outputs.build_number }}
 
       - name: Build App Bundle
         run: >
           flutter build appbundle --release
-          --build-name=${{ needs.prepare.outputs.version }}
-          --build-number=${{ needs.prepare.outputs.build_number }}
+          --build-name=${{ steps.meta.outputs.version }}
+          --build-number=${{ steps.meta.outputs.build_number }}
 
       - name: Stage artifacts
         run: |
           mkdir -p dist
           cp build/app/outputs/flutter-apk/app-release.apk \
-             "dist/one_preccent-${{ needs.prepare.outputs.version }}-android.apk"
+             "dist/one_preccent-${{ steps.meta.outputs.version }}-android.apk"
           cp build/app/outputs/bundle/release/app-release.aab \
-             "dist/one_preccent-${{ needs.prepare.outputs.version }}-android.aab"
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: android
-          path: dist/*
-          if-no-files-found: error
-
-  macos:
-    needs: prepare
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.prepare.outputs.tag }}
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: ${{ env.FLUTTER_CHANNEL }}
-          cache: true
-
-      - run: flutter pub get
-
-      - name: Build macOS app
-        run: >
-          flutter build macos --release
-          --build-name=${{ needs.prepare.outputs.version }}
-          --build-number=${{ needs.prepare.outputs.build_number }}
-
-      - name: Package
-        run: |
-          mkdir -p dist
-          ditto -c -k --sequesterRsrc --keepParent \
-            build/macos/Build/Products/Release/one_preccent.app \
-            "dist/one_preccent-${{ needs.prepare.outputs.version }}-macos.zip"
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: macos
-          path: dist/*
-          if-no-files-found: error
-
-  windows:
-    needs: prepare
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.prepare.outputs.tag }}
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: ${{ env.FLUTTER_CHANNEL }}
-          cache: true
-
-      - run: flutter pub get
-
-      - name: Build Windows app
-        run: >
-          flutter build windows --release
-          --build-name=${{ needs.prepare.outputs.version }}
-          --build-number=${{ needs.prepare.outputs.build_number }}
-
-      - name: Package
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force -Path dist | Out-Null
-          Compress-Archive -Path "build/windows/x64/runner/Release/*" `
-            -DestinationPath "dist/one_preccent-${{ needs.prepare.outputs.version }}-windows.zip"
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: windows
-          path: dist/*
-          if-no-files-found: error
-
-  linux:
-    needs: prepare
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.prepare.outputs.tag }}
-
-      - name: Install Linux build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y clang cmake ninja-build pkg-config \
-            libgtk-3-dev liblzma-dev libstdc++-12-dev
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: ${{ env.FLUTTER_CHANNEL }}
-          cache: true
-
-      - run: flutter pub get
-
-      - name: Build Linux app
-        run: >
-          flutter build linux --release
-          --build-name=${{ needs.prepare.outputs.version }}
-          --build-number=${{ needs.prepare.outputs.build_number }}
-
-      - name: Package
-        run: |
-          mkdir -p dist
-          tar -czf "dist/one_preccent-${{ needs.prepare.outputs.version }}-linux.tar.gz" \
-            -C build/linux/x64/release/bundle .
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: linux
-          path: dist/*
-          if-no-files-found: error
-
-  web:
-    needs: prepare
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.prepare.outputs.tag }}
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: ${{ env.FLUTTER_CHANNEL }}
-          cache: true
-
-      - run: flutter pub get
-
-      - name: Build web app
-        run: >
-          flutter build web --release
-          --build-name=${{ needs.prepare.outputs.version }}
-          --build-number=${{ needs.prepare.outputs.build_number }}
-
-      - name: Package
-        run: |
-          mkdir -p dist
-          (cd build/web && zip -r "$GITHUB_WORKSPACE/dist/one_preccent-${{ needs.prepare.outputs.version }}-web.zip" .)
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: web
-          path: dist/*
-          if-no-files-found: error
-
-  # Collect every platform's artifact and publish them on the tag's release.
-  release:
-    needs: [prepare, android, macos, windows, linux, web]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.prepare.outputs.tag }}
-
-      - uses: actions/download-artifact@v4
-        with:
-          path: dist
-          merge-multiple: true
+             "dist/one_preccent-${{ steps.meta.outputs.version }}-android.aab"
 
       - name: Create or update GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ needs.prepare.outputs.tag }}
+          TAG: ${{ steps.meta.outputs.tag }}
         run: |
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" dist/* --clobber
