@@ -94,6 +94,14 @@ class ChatMessage {
     questionLabel: questionLabel,
     replies: const [],
   );
+
+  ChatMessage withoutReplies() => ChatMessage(
+    id: id,
+    fromAgent: fromAgent,
+    text: text,
+    questionLabel: questionLabel,
+    card: card,
+  );
 }
 
 enum OnboardingStep { askGoal, questions, healthCheck, levelPlan }
@@ -190,6 +198,20 @@ class ChatController extends Notifier<ChatState> {
       state = state.copyWith(messages: [...state.messages, message]);
 
   void _say(Map<AppLanguage, String> text) => _append(_agent(text));
+
+  /// A coach line from the gateway. Quick replies only show under the newest
+  /// agent bubble, so the open buttons move to this bubble and stay tappable.
+  void _sayCoach(Map<AppLanguage, String> text) {
+    final agents = state.messages.where((m) => m.fromAgent).toList();
+    final open = agents.isEmpty ? const <ChatReply>[] : agents.last.replies;
+    state = state.copyWith(
+      messages: [
+        for (final m in state.messages)
+          m.replies.isEmpty ? m : m.withoutReplies(),
+      ],
+    );
+    _append(_agent(text, replies: open));
+  }
 
   int get _placementCount => fitnessPlugin.placementQuestions.length;
 
@@ -389,14 +411,17 @@ class ChatController extends Notifier<ChatState> {
           );
 
       // _say goes through filterOutgoing, so blocked words never show.
-      _say({AppLanguage.en: suggestion.text, AppLanguage.si: suggestion.text});
+      _sayCoach({
+        AppLanguage.en: suggestion.text,
+        AppLanguage.si: suggestion.text,
+      });
 
       // The AI may only suggest. The step-up card asks the user first.
       if (suggestion.wantsBigger) openStepUp();
     } on AiException catch (e) {
-      _say(_errorText(e.code));
+      _sayCoach(_errorText(e.code));
     } catch (_) {
-      _say(textOf('chat.no_connection'));
+      _sayCoach(textOf('chat.no_connection'));
     }
   }
 
@@ -460,11 +485,14 @@ class ChatController extends Notifier<ChatState> {
       return;
     }
 
+    // Every other message goes to the gateway for the coach's reply. The
+    // history is read now, so it ends with this message. The fixed steps
+    // below still decide what the app does next.
+    _coachReply();
+
     if (ref.read(appProvider).phase != AppPhase.onboarding) {
       if (reply?.value == 'okay' || reply?.value == 'still_too_much') {
         _missedReply(reply);
-      } else {
-        _coachReply();
       }
       return;
     }
