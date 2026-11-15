@@ -64,10 +64,10 @@ These are not code. Each one blocks a specific day, so write them before that da
 
 ### Tue Nov 17 — Gateway
 
-- [ ] Build the gateway as one small stateless function: holds the AI key, forwards the request, returns the answer
-- [ ] Gateway keeps nothing: no login, no user database, no saved prompts or answers, no analytics about people
-- [ ] Gateway logs hold only counts and error codes
-- [ ] Add the per-device rate limit
+- [x] Build the gateway as one small stateless function: holds the AI key, forwards the request, returns the answer
+- [x] Gateway keeps nothing: no login, no user database, no saved prompts or answers, no analytics about people
+- [x] Gateway logs hold only counts and error codes
+- [x] Add the per-device rate limit
 - [ ] Add Android app-check
 - [ ] Set the spending cap on the AI account
 - [x] Phone-side gateway client. The app contains no secrets
