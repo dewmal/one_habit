@@ -52,7 +52,7 @@ These are not code. Each one blocks a specific day, so write them before that da
 - [ ] Do the other two Day 1 checks above (Play Store rules, how testers get the build)
 - [x] Add the theme file: `AppColors`, `sunsetGradient`, type sizes, radii, spacing (UI guide pages 1 to 3). No screen hard-codes a colour or size
 - [x] Add the fonts: Poppins, and Noto Sans Sinhala for Sinhala text
-- [ ] Set up English and Sinhala text switching so a language tap changes all text at once
+- [x] Set up English and Sinhala text switching so a language tap changes all text at once
 - [ ] Replace the counter demo in `lib/main.dart` with an empty app shell
 - [ ] Add the encrypted SQLite database
 - [ ] Create tables: profile, habit, plan, daily log, plus chat history (see the open decision)
