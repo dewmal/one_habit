@@ -5,10 +5,11 @@ import '../app/tabs.dart';
 import '../components/bottom_nav.dart';
 import '../i18n/language.dart';
 import 'chat_page.dart';
+import 'history_page.dart';
 import 'plan_page.dart';
 import 'today_page.dart';
 
-/// The four tabs with the bottom nav. History is added in its screen commit.
+/// The four tabs with the bottom nav.
 class MainShell extends ConsumerWidget {
   const MainShell({super.key});
 
@@ -20,12 +21,7 @@ class MainShell extends ConsumerWidget {
     return Scaffold(
       body: IndexedStack(
         index: tab.index,
-        children: const [
-          ChatPage(),
-          TodayPage(),
-          PlanPage(),
-          SizedBox.shrink(),
-        ],
+        children: const [ChatPage(), TodayPage(), PlanPage(), HistoryPage()],
       ),
       bottomNavigationBar: SafeArea(
         top: false,

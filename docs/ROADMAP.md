@@ -156,8 +156,8 @@ These are not code. Each one blocks a specific day, so write them before that da
 - [ ] Save writes one daily log record: date, each task's result, the feeling. No AI call, works offline
 - [x] Reply after saving is the fixed phrase, never AI text. Skipped gets the same calm reply as Done
 - [x] "Log how it went" on Today opens the log card in Chat
-- [ ] **Screen 12 History:** one row per day, newest first, plain-word summary ("2 done, 1 partly"), feeling as a small tag
-- [ ] History has no scores, no streak numbers, no warning colours. A day with no log is shown calmly
+- [x] **Screen 12 History:** one row per day, newest first, plain-word summary ("2 done, 1 partly"), feeling as a small tag
+- [x] History has no scores, no streak numbers, no warning colours. A day with no log is shown calmly
 
 **Done when:** logs save to the phone and show in history.
 
