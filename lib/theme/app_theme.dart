@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 
+/// Font families: Poppins for Latin text, Noto Sans Sinhala as the fallback.
+const sansFamily = 'Poppins';
+const sinhalaFamily = 'NotoSansSinhala';
+const sinhalaFallback = [sinhalaFamily];
+
 /// Design tokens from the UI guide (pages 1 to 3).
 /// No screen hard-codes a colour or size: use these instead.
 class AppColors {
@@ -58,11 +63,15 @@ class AppSpacing {
 
 class AppText {
   static const welcomeTitle = TextStyle(
+    fontFamily: sansFamily,
+    fontFamilyFallback: sinhalaFallback,
     fontSize: 34,
     fontWeight: FontWeight.w600,
     color: AppColors.text,
   );
   static const screenTitle = TextStyle(
+    fontFamily: sansFamily,
+    fontFamilyFallback: sinhalaFallback,
     fontSize: 28,
     fontWeight: FontWeight.w600,
     color: AppColors.text,
@@ -70,42 +79,55 @@ class AppText {
 
   /// Settings and My data.
   static const screenTitleSmall = TextStyle(
+    fontFamily: sansFamily,
+    fontFamilyFallback: sinhalaFallback,
     fontSize: 24,
     fontWeight: FontWeight.w600,
     color: AppColors.text,
   );
   static const healthQuestion = TextStyle(
+    fontFamily: sansFamily,
+    fontFamilyFallback: sinhalaFallback,
     fontSize: 26,
     fontWeight: FontWeight.w600,
     color: AppColors.text,
   );
   static const cardTitle = TextStyle(
+    fontFamily: sansFamily,
+    fontFamilyFallback: sinhalaFallback,
     fontSize: 18,
     fontWeight: FontWeight.w600,
     color: AppColors.text,
   );
   static const body = TextStyle(
+    fontFamily: sansFamily,
+    fontFamilyFallback: sinhalaFallback,
     fontSize: 15,
     fontWeight: FontWeight.w400,
     height: 1.5,
     color: AppColors.text,
   );
   static const bodyMuted = TextStyle(
+    fontFamily: sansFamily,
+    fontFamilyFallback: sinhalaFallback,
     fontSize: 14,
     fontWeight: FontWeight.w400,
     height: 1.5,
     color: AppColors.textMuted,
   );
   static const smallLabel = TextStyle(
+    fontFamily: sansFamily,
+    fontFamilyFallback: sinhalaFallback,
     fontSize: 12,
     fontWeight: FontWeight.w600,
     color: AppColors.coralBright,
   );
-  static const navLabel = TextStyle(fontSize: 11);
+  static const navLabel = TextStyle(
+    fontSize: 11,
+    fontFamily: sansFamily,
+    fontFamilyFallback: sinhalaFallback,
+  );
 }
-
-const sansFamily = 'Poppins';
-const sinhalaFamily = 'NotoSansSinhala';
 
 ThemeData buildAppTheme() {
   return ThemeData(
