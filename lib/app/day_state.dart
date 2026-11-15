@@ -78,6 +78,16 @@ class DayController extends Notifier<DayState> {
     state = state.copyWith(results: results);
   }
 
+  /// Deletes the plan's day data: today's tasks and the stage.
+  void clearPlan() => state = state.copyWith(tasks: const [], stageIndex: 0);
+
+  /// Deletes every saved day.
+  void clearLog() =>
+      state = state.copyWith(history: const [], results: const {});
+
+  /// Deletes everything this controller holds.
+  void clearAll() => state = const DayState();
+
   /// Hard stop on or off. Paused means no steps and no reminders.
   void setPaused(bool paused) => state = state.copyWith(paused: paused);
 

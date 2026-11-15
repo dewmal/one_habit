@@ -6,6 +6,7 @@ import '../components/language_switch.dart';
 import '../components/setting_row.dart';
 import '../i18n/language.dart';
 import '../theme/app_theme.dart';
+import 'my_data_page.dart';
 
 /// Screen 13: language, reminders and quiet hours. Each change saves at once.
 class SettingsPage extends ConsumerWidget {
@@ -102,7 +103,11 @@ class SettingsPage extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpacing.gap16),
             _Label(tr('settings.privacy', language)),
-            SettingRow(label: tr('settings.my_data', language), onTap: () {}),
+            SettingRow(
+              label: tr('settings.my_data', language),
+              onTap: () => Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (_) => const MyDataPage())),
+            ),
             const SizedBox(height: 24),
             Text(tr('settings.lost_phone', language), style: AppText.bodyMuted),
           ],

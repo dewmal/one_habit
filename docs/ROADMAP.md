@@ -200,8 +200,8 @@ These are not code. Each one blocks a specific day, so write them before that da
 - [x] "I'm okay to continue" turns tasks and reminders back on
 - [ ] Hard stop rules tests
 - [ ] **Screen 14 My data:** five rows (About you, The habit, The plan, Daily log, Chat history), each with View and Delete
-- [ ] View opens a read-only list of that data
-- [ ] Delete asks once, then really removes the rows
+- [x] View opens a read-only list of that data
+- [x] Delete asks once, then really removes the rows
 - [ ] "Delete everything" confirms, wipes the database and returns to Welcome
 - [ ] My data edit `[cut 2]`
 - [ ] Check the AI note on screen 1 `[never cut]`

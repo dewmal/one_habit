@@ -157,8 +157,14 @@ class ChatController extends Notifier<ChatState> {
   @override
   ChatState build() => _initial();
 
-  /// Clears the chat, used after "Delete everything".
+  /// Clears the chat history, used by My data and "Delete everything".
   void reset() => state = _initial();
+
+  /// Deletes the habit answers: goal, placement, health check and level.
+  void clearHabit() => state = ChatState(messages: state.messages);
+
+  /// Deletes the steps the plan was built from.
+  void clearSteps() => state = state.copyWith(steps: const []);
 
   ChatState _initial() =>
       ChatState(messages: [_agent(textOf('chat.greeting'))]);

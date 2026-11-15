@@ -46,6 +46,9 @@ class SettingsController extends Notifier<SettingsState> {
     state = state.copyWith(dailyLimit: next);
   }
 
+  /// Back to the default settings.
+  void reset() => state = const SettingsState();
+
   void setMorning(TimeOfDay time) => state = state.copyWith(morning: time);
 
   void setEvening(TimeOfDay time) => state = state.copyWith(evening: time);
