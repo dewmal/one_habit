@@ -194,10 +194,10 @@ These are not code. Each one blocks a specific day, so write them before that da
 ### Thu Nov 26 — Hard stop, My data, honesty (screens 10, 14)
 
 - [ ] Hard stop detection, as decided in the open decisions `[never cut]`
-- [ ] Rule: hard stop is triggered by the rules engine, not the AI, and applies to every reply after the user's message `[never cut]`
-- [ ] **Screen 10 Hard stop:** fixed care message, info card "Everything is paused" suggesting a doctor or a trusted person, quick replies "Keep it paused" and "I'm okay to continue"
+- [x] Rule: hard stop is triggered by the rules engine, not the AI, and applies to every reply after the user's message `[never cut]`
+- [x] **Screen 10 Hard stop:** fixed care message, info card "Everything is paused" suggesting a doctor or a trusted person, quick replies "Keep it paused" and "I'm okay to continue"
 - [ ] Write a paused flag for the project and cancel all scheduled notifications. The plan is not changed
-- [ ] "I'm okay to continue" turns tasks and reminders back on
+- [x] "I'm okay to continue" turns tasks and reminders back on
 - [ ] Hard stop rules tests
 - [ ] **Screen 14 My data:** five rows (About you, The habit, The plan, Daily log, Chat history), each with View and Delete
 - [ ] View opens a read-only list of that data

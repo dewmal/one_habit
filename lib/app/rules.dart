@@ -44,3 +44,20 @@ String placeLevel(
 
 /// A bigger step never happens without the user's yes.
 bool canStepUp({required bool userSaidYes}) => userSaidYes;
+
+/// Words that mean "unwell" or "very low". Placeholder list: the detection
+/// method (word list, AI flag or both) is still open (due Thu Nov 26).
+const hardStopWords = [
+  'unwell',
+  'very low',
+  'feel low',
+  'feel really low',
+  'feeling low',
+  'not well',
+];
+
+/// The hard stop is triggered here, in code, never by the AI.
+bool isHardStop(String text) {
+  final lower = text.toLowerCase();
+  return hardStopWords.any(lower.contains);
+}

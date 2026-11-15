@@ -53,6 +53,11 @@ class StepUpCardData extends ChatCard {
   final String bigger;
 }
 
+/// Shown after "I feel unwell" or "very low": everything is paused.
+class HardStopCardData extends ChatCard {
+  const HardStopCardData();
+}
+
 class LogCardData extends ChatCard {
   const LogCardData({required this.tasks, required this.initialResults});
 
@@ -252,6 +257,29 @@ class ChatController extends Notifier<ChatState> {
     _say(textOf('log.saved_reply'));
   }
 
+  void _hardStop() {
+    ref.read(dayProvider.notifier).setPaused(true);
+    _append(
+      _agent(
+        textOf('hardstop.care'),
+        replies: [
+          ChatReply(value: 'keep_paused', label: textOf('hardstop.keep')),
+          ChatReply(value: 'resume', label: textOf('hardstop.resume')),
+        ],
+        card: const HardStopCardData(),
+      ),
+    );
+  }
+
+  void _hardStopReply(ChatReply reply) {
+    if (reply.value == 'resume') {
+      ref.read(dayProvider.notifier).setPaused(false);
+      _say(textOf('hardstop.resume_ack'));
+    } else {
+      _say(textOf('hardstop.keep_ack'));
+    }
+  }
+
   /// The offer after a steady run. Shown only; the plan changes on a yes.
   void openStepUp() {
     if (ref.read(dayProvider).paused) return;
@@ -336,6 +364,17 @@ class ChatController extends Notifier<ChatState> {
         text: reply?.label ?? {AppLanguage.en: text, AppLanguage.si: text},
       ),
     );
+
+    // The hard stop comes first and applies to every reply after it.
+    if (reply == null && isHardStop(text)) {
+      _hardStop();
+      return;
+    }
+
+    if (reply?.value == 'keep_paused' || reply?.value == 'resume') {
+      _hardStopReply(reply!);
+      return;
+    }
 
     if (ref.read(appProvider).phase != AppPhase.onboarding) {
       if (reply?.value == 'okay' || reply?.value == 'still_too_much') {

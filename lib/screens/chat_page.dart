@@ -121,6 +121,14 @@ class ChatPage extends ConsumerWidget {
             ],
           ),
         ),
+        if (card is HardStopCardData) ...[
+          const SizedBox(height: AppSpacing.gap8),
+          InfoCard(
+            title: tr('hardstop.title', language),
+            text: tr('hardstop.body', language),
+            icon: Icons.pause_circle_outline,
+          ),
+        ],
         if (card is StepUpCardData) ...[
           const SizedBox(height: AppSpacing.gap8),
           StepUpCard(

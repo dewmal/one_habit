@@ -69,6 +69,22 @@ const Map<String, Map<AppLanguage, String>> _strings = {
   },
   'today.log_button': {AppLanguage.en: 'Log how it went'},
   'plan.title': {AppLanguage.en: 'Plan'},
+  // Fixed care message. Wording needs approval (due Thu Nov 26).
+  'hardstop.care': {
+    AppLanguage.en: "Thank you for telling me. Let's pause everything. No steps and no reminders until you are ready.",
+  },
+  'hardstop.title': {AppLanguage.en: 'Everything is paused'},
+  'hardstop.body': {
+    AppLanguage.en: 'No steps and no reminders. Your plan is safe and stays where it is. If you feel unwell or very low, please talk to a doctor or someone you trust.',
+  },
+  'hardstop.keep': {AppLanguage.en: 'Keep it paused'},
+  'hardstop.resume': {AppLanguage.en: "I'm okay to continue"},
+  'hardstop.keep_ack': {
+    AppLanguage.en: 'Okay. Everything stays paused for now.',
+  },
+  'hardstop.resume_ack': {
+    AppLanguage.en: 'Good. Tasks and reminders are back on.',
+  },
   // Fixed step-up question. Wording needs approval (due Tue Nov 24).
   'stepup.question': {AppLanguage.en: 'Ready for a bit more?'},
   'stepup.reason': {

@@ -78,6 +78,9 @@ class DayController extends Notifier<DayState> {
     state = state.copyWith(results: results);
   }
 
+  /// Hard stop on or off. Paused means no steps and no reminders.
+  void setPaused(bool paused) => state = state.copyWith(paused: paused);
+
   /// Saves the log card for today.
   void saveLog(Map<int, TaskResult> results, Feeling feeling) {
     state = state.copyWith(results: results);
