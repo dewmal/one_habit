@@ -69,6 +69,20 @@ const Map<String, Map<AppLanguage, String>> _strings = {
   },
   'today.log_button': {AppLanguage.en: 'Log how it went'},
   'plan.title': {AppLanguage.en: 'Plan'},
+  // Fixed phrase for a missed day. Wording needs approval (due Tue Nov 24).
+  'missed.phrase': {
+    AppLanguage.en:
+        'Missed days happen. Nothing is lost and your plan stays where it is.',
+  },
+  'missed.made_smaller': {
+    AppLanguage.en: 'I made tomorrow smaller, so it is easy to start again.',
+  },
+  'missed.card_heading': {AppLanguage.en: "Tomorrow's small step"},
+  'missed.smaller': {AppLanguage.en: 'Smaller'},
+  'missed.comparison': {AppLanguage.en: 'Was: {was} steps. Now: {now} step.'},
+  'missed.okay': {AppLanguage.en: 'Okay'},
+  'missed.still_much': {AppLanguage.en: 'Still too much'},
+  'missed.okay_ack': {AppLanguage.en: 'Good. See you tomorrow.'},
   'history.title': {AppLanguage.en: 'History'},
   'history.subtitle': {AppLanguage.en: 'Your logs, newest first'},
   'history.today': {AppLanguage.en: 'Today'},

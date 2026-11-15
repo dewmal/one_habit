@@ -4,10 +4,16 @@ import '../theme/app_theme.dart';
 
 /// Gradient avatar, chat name and a "Your coach · AI" line.
 class ChatHeader extends StatelessWidget {
-  const ChatHeader({super.key, required this.title, required this.subtitle});
+  const ChatHeader({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    this.trailing,
+  });
 
   final String title;
   final String subtitle;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +38,7 @@ class ChatHeader extends StatelessWidget {
               ],
             ),
           ),
+          ?trailing,
         ],
       ),
     );

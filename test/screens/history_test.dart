@@ -29,7 +29,7 @@ void main() {
 
       expect(find.text('Your logs, newest first'), findsOneWidget);
       // One is the nav tab, one is the History row.
-    expect(find.text('Today'), findsNWidgets(2));
+      expect(find.text('Today'), findsNWidgets(2));
       expect(find.text('1 done, 2 not logged yet'), findsOneWidget);
       expect(find.text('Yesterday'), findsOneWidget);
       expect(find.text('All 3 steps done'), findsOneWidget);

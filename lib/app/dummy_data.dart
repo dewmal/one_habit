@@ -71,3 +71,7 @@ List<DayEntry> dummyHistory(DateTime today) {
 
 /// Goal shown on Plan when the user has not set one yet (dummy).
 final dummyGoal = dummyText('go to the gym every day');
+
+/// The smaller step shown after missed days (dummy).
+const dummySmallestStep = 'Put on your gym shoes';
+const dummyTinierStep = 'Put on one shoe';

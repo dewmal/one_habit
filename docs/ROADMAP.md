@@ -169,7 +169,7 @@ These are not code. Each one blocks a specific day, so write them before that da
 - [ ] Night step: the agent reads progress and proposes a change, and the rules engine approves it or holds it for a yes
 - [ ] Rules tests, including "after three misses the plan can never get bigger"
 - [ ] **Screen 7 After missed days:** fixed missed-day phrase, short agent message, task card with a "Smaller" tag and a "Was: 3 steps. Now: 1 step." line
-- [ ] Quick replies "Okay" (accept) and "Still too much" (smaller again)
+- [x] Quick replies "Okay" (accept) and "Still too much" (smaller again)
 - [ ] Use the gateway only if the tasks need rewriting
 - [ ] **Screen 8 Step-up offer** `[cut 4]`, build after screen 7: fixed question on a sunset header, "Now" and "A bit more" lines, Yes and Not yet, the line "Nothing changes unless you say yes."
 - [ ] Yes applies the bigger task from tomorrow. Not yet changes nothing. The plan is written only after Yes

@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../chat/chat_controller.dart';
 import '../components/info_card.dart';
 import '../components/log_card.dart';
+import '../components/missed_card.dart';
 import '../components/level_card.dart';
 import '../plugins/fitness_plugin.dart';
 import '../components/chat_bubbles.dart';
@@ -42,6 +44,7 @@ class ChatPage extends ConsumerWidget {
             ChatHeader(
               title: tr('chat.general', language),
               subtitle: tr('chat.coach', language),
+              trailing: kDebugMode ? _DemoMenu(controller: controller) : null,
             ),
             Expanded(
               child: ListView(
@@ -117,6 +120,21 @@ class ChatPage extends ConsumerWidget {
             ],
           ),
         ),
+        if (card is MissedDayCardData) ...[
+          const SizedBox(height: AppSpacing.gap8),
+          MissedCard(
+            heading: tr('missed.card_heading', language),
+            smallerTag: tr('missed.smaller', language),
+            step: card.step,
+            comparison: resolve(
+              textOf('missed.comparison', {
+                'was': '${card.was}',
+                'now': '${card.now}',
+              }),
+              language,
+            ),
+          ),
+        ],
         if (card is LogCardData) ...[
           const SizedBox(height: AppSpacing.gap8),
           LogCard(
@@ -155,6 +173,27 @@ class ChatPage extends ConsumerWidget {
             InfoCard(text: tr('level.gentle_note', language)),
           ],
         ],
+      ],
+    );
+  }
+}
+
+/// Debug builds only: starts the scenarios that real rules will trigger later.
+class _DemoMenu extends StatelessWidget {
+  const _DemoMenu({required this.controller});
+
+  final ChatController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<String>(
+      tooltip: 'Demo scenarios (debug only)',
+      icon: const Icon(Icons.science_outlined, color: AppColors.textMuted),
+      onSelected: (value) {
+        if (value == 'missed') controller.openMissedDays();
+      },
+      itemBuilder: (_) => const [
+        PopupMenuItem(value: 'missed', child: Text('Demo: missed days')),
       ],
     );
   }

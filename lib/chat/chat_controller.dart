@@ -32,6 +32,19 @@ class LevelCardData extends ChatCard {
   final bool healthLock;
 }
 
+/// The smaller step after missed days. [was] and [now] are step counts.
+class MissedDayCardData extends ChatCard {
+  const MissedDayCardData({
+    required this.was,
+    required this.now,
+    required this.step,
+  });
+
+  final int was;
+  final int now;
+  final String step;
+}
+
 class LogCardData extends ChatCard {
   const LogCardData({required this.tasks, required this.initialResults});
 
@@ -231,6 +244,51 @@ class ChatController extends Notifier<ChatState> {
     _say(textOf('log.saved_reply'));
   }
 
+  /// After missed days: the fixed phrase, then one smaller step.
+  /// Missed days only ever make the plan smaller. They never reset it.
+  void openMissedDays() {
+    if (ref.read(dayProvider).paused) return;
+    _say(textOf('missed.phrase'));
+    _showSmallerStep(
+      from: ref.read(dayProvider).tasks.length,
+      step: dummySmallestStep,
+    );
+  }
+
+  void _showSmallerStep({required int from, required String step}) {
+    state = state.copyWith(steps: [step]);
+    state = state.copyWith(
+      messages: [
+        for (final m in state.messages)
+          m.card is MissedDayCardData ? m.withoutCard() : m,
+      ],
+    );
+    _append(
+      _agent(
+        textOf('missed.made_smaller'),
+        replies: [
+          ChatReply(value: 'okay', label: textOf('missed.okay')),
+          ChatReply(
+            value: 'still_too_much',
+            label: textOf('missed.still_much'),
+          ),
+        ],
+        card: MissedDayCardData(was: from, now: 1, step: step),
+      ),
+    );
+  }
+
+  void _missedReply(ChatReply? reply) {
+    switch (reply?.value) {
+      case 'okay':
+        _say(textOf('missed.okay_ack'));
+      case 'still_too_much':
+        _showSmallerStep(from: 1, step: dummyTinierStep);
+      default:
+        _say(textOf('chat.noted'));
+    }
+  }
+
   /// The user typed text, or tapped a quick reply (pass [reply]).
   void send(String raw, {ChatReply? reply}) {
     final text = raw.trim();
@@ -245,7 +303,11 @@ class ChatController extends Notifier<ChatState> {
     );
 
     if (ref.read(appProvider).phase != AppPhase.onboarding) {
-      _say(textOf('chat.noted'));
+      if (reply?.value == 'okay' || reply?.value == 'still_too_much') {
+        _missedReply(reply);
+      } else {
+        _say(textOf('chat.noted'));
+      }
       return;
     }
 
