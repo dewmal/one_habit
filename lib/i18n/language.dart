@@ -69,6 +69,18 @@ const Map<String, Map<AppLanguage, String>> _strings = {
   },
   'today.log_button': {AppLanguage.en: 'Log how it went'},
   'plan.title': {AppLanguage.en: 'Plan'},
+  'settings.title': {AppLanguage.en: 'Settings'},
+  'settings.language': {AppLanguage.en: 'Language'},
+  'settings.reminders': {AppLanguage.en: 'Reminders'},
+  'settings.most_reminders': {AppLanguage.en: 'Most reminders a day'},
+  'settings.morning': {AppLanguage.en: 'Morning reminder'},
+  'settings.evening': {AppLanguage.en: 'Evening reminder'},
+  'settings.quiet': {AppLanguage.en: 'Quiet hours'},
+  'settings.privacy': {AppLanguage.en: 'Privacy'},
+  'settings.my_data': {AppLanguage.en: 'My data'},
+  'settings.lost_phone': {
+    AppLanguage.en: 'Everything is saved only on this phone. If the phone is lost, your progress is lost too. Backup comes in a later version.',
+  },
   // Fixed care message. Wording needs approval (due Thu Nov 26).
   'hardstop.care': {
     AppLanguage.en: "Thank you for telling me. Let's pause everything. No steps and no reminders until you are ready.",

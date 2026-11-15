@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'i18n/language.dart';
@@ -19,6 +20,12 @@ class HabitAgentApp extends ConsumerWidget {
       title: tr('app.name', language),
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('en')],
       home: const AppRoot(),
     );
   }

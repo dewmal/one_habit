@@ -38,6 +38,8 @@ dependencies:
   sqflite_sqlcipher: ^3.4.1
   flutter_secure_storage: ^11.2.0
   path: ^1.9.1
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:

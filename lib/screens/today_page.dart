@@ -11,6 +11,7 @@ import '../components/task_tile.dart';
 import '../i18n/language.dart';
 import '../plugins/fitness_plugin.dart';
 import '../theme/app_theme.dart';
+import 'settings_page.dart';
 
 /// Screen 5: only today's tasks. No streaks, scores or tomorrow's tasks.
 class TodayPage extends ConsumerWidget {
@@ -49,7 +50,9 @@ class TodayPage extends ConsumerWidget {
                   ),
                 ),
                 IconButton.filled(
-                  onPressed: () {},
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const SettingsPage()),
+                  ),
                   style: IconButton.styleFrom(
                     backgroundColor: AppColors.surface,
                     foregroundColor: AppColors.text,
