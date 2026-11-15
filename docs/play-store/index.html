@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One Habit</title>
+
+<!--
+  ONE HABIT - GOOGLE PLAY PAGES
+
+  One file, many pages. Each page has its own # link:
+
+    index.html#/privacy          Privacy policy        (public, give this URL to Play)
+    index.html#/terms            Terms of Service      (public, optional URL for Play)
+    index.html#/delete-data      How to delete data    (public)
+    index.html#/data-safety      Data safety answers   (for you, when filling Play Console)
+    index.html#/content-rating   Content rating answers
+    index.html#/target-audience  Target audience answers
+    index.html#/other            Ads, app access, health declaration
+
+  BEFORE YOU PUBLISH: search this file for "contact@example.com"
+  and replace it with your real support email.
+-->
+
+<style>
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Sinhala", sans-serif;
+    line-height: 1.6;
+    color: #1f2933;
+    background: #f6f7f5;
+  }
+
+  header {
+    background: #1f6f5c;
+    color: white;
+    padding: 16px 20px;
+  }
+  header a { color: white; text-decoration: none; font-size: 20px; font-weight: 600; }
+
+  nav {
+    background: white;
+    border-bottom: 1px solid #dde1dc;
+    padding: 8px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  nav a {
+    padding: 6px 12px;
+    border-radius: 6px;
+    color: #1f6f5c;
+    text-decoration: none;
+    font-size: 14px;
+  }
+  nav a:hover { background: #e7f1ee; }
+  nav a.active { background: #1f6f5c; color: white; }
+
+  main { max-width: 760px; margin: 0 auto; padding: 24px 20px 60px; }
+
+  h1 { font-size: 28px; line-height: 1.25; margin: 8px 0 4px; }
+  h2 { font-size: 19px; margin: 32px 0 8px; }
+  .small { color: #5b6770; font-size: 14px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; background: white; }
+  th, td { text-align: left; vertical-align: top; padding: 8px 10px; border: 1px solid #dde1dc; font-size: 15px; }
+  th { background: #eef2ef; }
+
+  /* Green box = the answer to pick in Play Console */
+  .answer { font-weight: 600; color: #1f6f5c; }
+
+  /* Yellow box = something you must check yourself */
+  .check {
+    background: #fff7dd;
+    border-left: 4px solid #d9a400;
+    padding: 10px 14px;
+    margin: 14px 0;
+    font-size: 15px;
+  }
+
+  .card-list { list-style: none; padding: 0; }
+  .card-list li { background: white; border: 1px solid #dde1dc; border-radius: 8px; margin: 8px 0; }
+  .card-list a { display: block; padding: 12px 16px; color: inherit; text-decoration: none; }
+  .card-list a:hover { background: #e7f1ee; }
+  .card-list b { color: #1f6f5c; }
+
+  /* When JavaScript is on, only the open page is shown.
+     When it is off, every page is shown one after another, so nothing is hidden. */
+  .js .page { display: none; }
+  .js .page.open { display: block; }
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #14191c; color: #e4e8ea; }
+    nav, table, .card-list li { background: #1d2428; }
+    nav, th, td, .card-list li { border-color: #333d43; }
+    th { background: #242d32; }
+    nav a, .answer, .card-list b { color: #7fd1bc; }
+    nav a:hover, .card-list a:hover { background: #24332f; }
+    nav a.active { background: #1f6f5c; color: white; }
+    .small { color: #9aa5ac; }
+    .check { background: #3a3215; }
+  }
+</style>
+</head>
+
+<body>
+
+<header>
+  <a href="#/">One Habit</a>
+</header>
+
+<nav>
+  <a href="#/">Home</a>
+  <a href="#/privacy">Privacy policy</a>
+  <a href="#/terms">Terms of Service</a>
+  <a href="#/delete-data">Delete your data</a>
+  <a href="#/data-safety">Data safety</a>
+  <a href="#/content-rating">Content rating</a>
+  <a href="#/target-audience">Target audience</a>
+  <a href="#/other">Other declarations</a>
+</nav>
+
+<main>
+
+<!-- ============================================================
+     PAGE: HOME            link: #/
+     ============================================================ -->
+<section class="page" id="home">
+  <h1>One Habit</h1>
+  <p>One Habit is an Android app where an AI coach helps you build one habit at a time, in Sinhala and English.</p>
+
+  <h2>For people who use the app</h2>
+  <ul class="card-list">
+    <li><a href="#/privacy"><b>Privacy policy</b><br>What the app keeps on your phone and what leaves it.</a></li>
+    <li><a href="#/terms"><b>Terms of Service</b><br>The rules for using the app.</a></li>
+    <li><a href="#/delete-data"><b>Delete your data</b><br>How to remove everything the app has saved.</a></li>
+  </ul>
+
+  <h2>Google Play setup answers</h2>
+  <p class="small">These pages list the answers to give in Play Console, under Policy &gt; App content.</p>
+  <ul class="card-list">
+    <li><a href="#/data-safety"><b>Data safety</b><br>Which data types to declare, and why.</a></li>
+    <li><a href="#/content-rating"><b>Content rating</b><br>Answers for the rating questionnaire.</a></li>
+    <li><a href="#/target-audience"><b>Target audience</b><br>Which age group to pick.</a></li>
+    <li><a href="#/other"><b>Other declarations</b><br>Ads, app access, health apps and the rest.</a></li>
+  </ul>
+</section>
+
+
+<!-- ============================================================
+     PAGE: PRIVACY POLICY   link: #/privacy
+     ============================================================ -->
+<section class="page" id="privacy">
+  <h1>Privacy policy</h1>
+  <p class="small">App: One Habit (com.syigen.onehabit) · Developer: Syigen · Effective: 15 November 2026</p>
+
+  <h2>The short version</h2>
+  <ul>
+    <li>There is no One Habit account. You never sign up or log in.</li>
+    <li>Your plan, your daily log, your health-check answers and your full chat history stay on your phone, in an encrypted database.</li>
+    <li>When you chat with the coach, a small part of the conversation is sent over the internet to an AI model so it can write a reply.</li>
+    <li>The app has no ads and no analytics, and we do not sell data.</li>
+  </ul>
+
+  <h2>What stays on your phone</h2>
+  <ul>
+    <li>Your profile: language, quiet hours and notification limit</li>
+    <li>Your habit goal, starting level and plan</li>
+    <li>Your daily log: what you did and how it felt</li>
+    <li>Your answers to the health-check questions</li>
+    <li>Your full chat history</li>
+  </ul>
+  <p>We cannot see any of this. It is never uploaded to us.</p>
+
+  <h2>What leaves your phone</h2>
+  <p>The coach is an AI. To write a reply, the app sends a request through our gateway server to a third-party AI model provider. A request can contain:</p>
+  <ul>
+    <li>The last few messages of the open chat, including what you just typed</li>
+    <li>A short summary of your plan and progress</li>
+    <li>If the health check asked for a gentle plan, only that result ("keep very gentle"), not your answers</li>
+    <li>A random ID the app creates when it is installed. It is not linked to your name, phone number, Google account or any other identity</li>
+  </ul>
+  <p>If you type something about your health in the chat, such as "my knee hurts", that message is part of the request.</p>
+  <p>The app does not send your name, contact details, location, contacts, photos or files.</p>
+
+  <h2>How this data is used</h2>
+  <ul>
+    <li><b>Chat content and the summary</b> are used only to write the coach's reply. Our gateway passes the request on and does not store it. Its logs hold only counts and error codes, never message content.</li>
+    <li><b>The random ID</b> is used only to limit how many requests one phone can send, to stop abuse. It is kept in the gateway's memory for about one hour and is not saved.</li>
+    <li><b>The AI model provider</b> processes the request for us to produce the reply. The provider may keep requests for a limited time under its own terms, for example to detect abuse.</li>
+  </ul>
+  <p>We do not use your data for advertising, we do not build a profile of you, and we do not sell or rent data to anyone.</p>
+
+  <h2>Health information</h2>
+  <p>One Habit is a habit coach. It is not a medical service and does not diagnose or treat any condition. The health check is a few yes or no questions used only to keep your plan gentle. If you have a health concern, please talk to a doctor.</p>
+
+  <h2>Notifications</h2>
+  <p>Reminders are scheduled on your phone. They do not come from a server.</p>
+
+  <h2>Google Drive backup (planned for a later version)</h2>
+  <p>A later version will let you back up to your own Google Drive. It will be optional and off by default. The backup file is locked on your phone with a password you choose before it is uploaded, so neither Google nor we can read it. Google sign-in will be used only for this backup.</p>
+
+  <h2>Security</h2>
+  <ul>
+    <li>The database on your phone is encrypted.</li>
+    <li>Requests to the gateway are sent over an encrypted connection (HTTPS).</li>
+  </ul>
+
+  <h2>Keeping and deleting data</h2>
+  <p>Data on your phone stays there until you delete it. The "My data" screen lets you view and delete anything. Uninstalling the app removes all of it. See <a href="#/delete-data">Delete your data</a>.</p>
+
+  <h2>Children</h2>
+  <p>One Habit is made for adults aged 18 and over. It is not directed at children, and we do not knowingly collect data from children.</p>
+
+  <h2>Changes to this policy</h2>
+  <p>If this policy changes, the new version will be posted on this page with a new date.</p>
+
+  <h2>Contact</h2>
+  <p>Questions about privacy: <a href="mailto:contact@example.com">contact@example.com</a></p>
+</section>
+
+
+<!-- ============================================================
+     PAGE: DELETE YOUR DATA   link: #/delete-data
+     ============================================================ -->
+<section class="page" id="delete-data">
+  <h1>Delete your data</h1>
+  <p>One Habit has no account and keeps your data on your phone, so you can delete it yourself at any time.</p>
+
+  <h2>Delete inside the app</h2>
+  <ol>
+    <li>Open One Habit.</li>
+    <li>Open the <b>My data</b> screen.</li>
+    <li>Choose what to delete: one project, or everything.</li>
+  </ol>
+  <p>Deleted data is removed from the phone. It cannot be brought back.</p>
+
+  <h2>Delete everything by uninstalling</h2>
+  <p>Uninstalling the app removes its database from your phone.</p>
+
+  <h2>Data outside your phone</h2>
+  <p>We do not keep a copy of your chats, plans or logs, so there is nothing for us to delete on our side. The random ID used for the request limit is cleared from the gateway's memory after about one hour.</p>
+
+  <h2>Need help?</h2>
+  <p>Write to <a href="mailto:contact@example.com">contact@example.com</a>.</p>
+</section>
+
+
+<!-- ============================================================
+     PAGE: TERMS OF SERVICE   link: #/terms
+     ============================================================ -->
+<section class="page" id="terms">
+  <h1>Terms of Service</h1>
+  <p class="small">App: One Habit (com.syigen.onehabit) · Developer: Syigen · Effective: 15 November 2026</p>
+
+  <p>These terms are the agreement between you and Syigen for using the One Habit app. By using the app, you agree to them. If you do not agree, please do not use the app.</p>
+
+  <h2>1. What One Habit is</h2>
+  <p>One Habit is a habit coach. An AI helps you build one habit at a time with small daily tasks. The coach is an AI, not a person.</p>
+
+  <h2>2. Not medical advice</h2>
+  <p>One Habit is not a medical service. It does not diagnose, treat or prevent any condition, and it is not a replacement for a doctor, a physiotherapist or a qualified trainer.</p>
+  <ul>
+    <li>Talk to a doctor before starting exercise if you have a health condition or any doubt.</li>
+    <li>Stop and get medical help if you feel pain, dizziness or feel unwell.</li>
+    <li>In an emergency, contact your local emergency service.</li>
+  </ul>
+
+  <h2>3. AI replies can be wrong</h2>
+  <p>The coach's messages are written by an AI model. They can be inaccurate, incomplete or not right for you. Use your own judgement, and do not rely on the app for decisions about your health or safety.</p>
+
+  <h2>4. Who can use the app</h2>
+  <p>The app is for adults aged 18 and over.</p>
+
+  <h2>5. Using the app fairly</h2>
+  <p>Please do not:</p>
+  <ul>
+    <li>Use the app for anything illegal or harmful</li>
+    <li>Send automated or excessive requests to the AI service</li>
+    <li>Try to break, bypass or copy the app's security or its AI service</li>
+  </ul>
+  <p>The AI service has a request limit for each phone. We may limit or block access that abuses the service.</p>
+
+  <h2>6. Your data</h2>
+  <p>Your plan, logs and chats are stored on your phone. The <a href="#/privacy">Privacy policy</a> explains what stays on the phone and what leaves it.</p>
+  <p>This version has no backup. If you lose your phone, uninstall the app or delete its data, your progress is gone and we cannot bring it back.</p>
+
+  <h2>7. Price</h2>
+  <p>One Habit is free. It has no ads and no purchases inside the app. If this changes, we will update these terms first.</p>
+
+  <h2>8. Changes to the app</h2>
+  <p>We may change, pause or stop the app or any feature. The chat needs an internet connection and the AI service, which may not always be available.</p>
+
+  <h2>9. No warranty</h2>
+  <p>The app is provided "as is". We do not promise that it will be free of errors, always available, or that using it will produce a particular result.</p>
+
+  <h2>10. Limit of liability</h2>
+  <p>As far as the law allows, Syigen is not liable for injury, loss or damage that comes from using the app or from following its suggestions. Nothing in these terms removes rights that the law in your country gives you as a consumer.</p>
+
+  <h2>11. Changes to these terms</h2>
+  <p>If these terms change, the new version will be posted on this page with a new date. Continuing to use the app after that means you accept the new terms.</p>
+
+  <h2>12. Governing law</h2>
+  <p>These terms are governed by the laws of Sri Lanka, except where the law in your own country says otherwise.</p>
+
+  <h2>13. Contact</h2>
+  <p>Questions about these terms: <a href="mailto:contact@example.com">contact@example.com</a></p>
+</section>
+
+
+<!-- ============================================================
+     PAGE: DATA SAFETY   link: #/data-safety
+     ============================================================ -->
+<section class="page" id="data-safety">
+  <h1>Data safety answers</h1>
+  <p class="small">Play Console &gt; Policy &gt; App content &gt; Data safety. Answers match the app as built today: no ads, no analytics, no crash reporting, no account.</p>
+
+  <h2>Step 1: Data collection and security</h2>
+  <table>
+    <tr><th>Question</th><th>Answer</th></tr>
+    <tr><td>Does your app collect or share any of the required user data types?</td><td class="answer">Yes</td></tr>
+    <tr><td>Is all of the user data collected by your app encrypted in transit?</td><td class="answer">Yes</td></tr>
+    <tr><td>Which account creation methods does your app support?</td><td class="answer">My app does not allow users to create an account</td></tr>
+    <tr><td>Do you provide a way for users to request that their data is deleted?</td><td class="answer">Yes. Link: this file, #/delete-data</td></tr>
+  </table>
+  <div class="check"><b>Check:</b> "encrypted in transit" is only true if the gateway URL in the release build starts with https://.</div>
+
+  <h2>Step 2: Data types to tick</h2>
+  <p>"Collected" in this form means "sent off the phone". Chat requests leave the phone, so they count, even though the gateway stores nothing.</p>
+  <table>
+    <tr><th>Data type</th><th>Why</th></tr>
+    <tr><td><b>Messages</b> &gt; Other in-app messages</td><td>Chat text is sent to the AI to write a reply</td></tr>
+    <tr><td><b>Health and fitness</b> &gt; Fitness info</td><td>The plan summary and exercise talk are in the request</td></tr>
+    <tr><td><b>Health and fitness</b> &gt; Health info</td><td>The "keep very gentle" result, and anything the user types about pain or illness</td></tr>
+    <tr><td><b>Device or other IDs</b></td><td>The random install ID sent as X-Device-Id for the rate limit</td></tr>
+  </table>
+  <p>Leave everything else unticked: location, personal info, financial info, photos, audio, files, calendar, contacts, app activity, web browsing, app info and performance.</p>
+
+  <h2>Step 3: Answers for each ticked type</h2>
+  <table>
+    <tr><th>Question</th><th>Messages, Fitness info, Health info</th><th>Device or other IDs</th></tr>
+    <tr><td>Collected, shared, or both?</td><td class="answer">Collected only</td><td class="answer">Collected only</td></tr>
+    <tr><td>Processed ephemerally?</td><td class="answer">No</td><td class="answer">No</td></tr>
+    <tr><td>Required or optional?</td><td class="answer">Required</td><td class="answer">Required</td></tr>
+    <tr><td>Why is it collected?</td><td class="answer">App functionality</td><td class="answer">Fraud prevention, security and compliance</td></tr>
+  </table>
+
+  <div class="check">
+    <b>Check 1, "Shared":</b> sending data to the AI provider is not "sharing" only if the provider works as your service provider: it processes the data for you and does not use it for its own purposes, such as training. Read the provider's API terms. If they do not say this, tick "Shared" too.
+  </div>
+  <div class="check">
+    <b>Check 2, "Ephemeral":</b> the gateway keeps nothing, but most AI providers keep requests for some days. That is why the answer above is "No". Change it to "Yes" only if your provider has zero retention.
+  </div>
+  <div class="check">
+    <b>Later:</b> when Google Drive backup, voice notes or crash reporting are added, come back and update this form and the privacy policy.
+  </div>
+</section>
+
+
+<!-- ============================================================
+     PAGE: CONTENT RATING   link: #/content-rating
+     ============================================================ -->
+<section class="page" id="content-rating">
+  <h1>Content rating answers</h1>
+  <p class="small">Play Console &gt; Policy &gt; App content &gt; Content rating. The questionnaire wording changes from time to time, so match each question by its meaning.</p>
+
+  <h2>Start</h2>
+  <table>
+    <tr><th>Question</th><th>Answer</th></tr>
+    <tr><td>Email address</td><td class="answer">Your support email</td></tr>
+    <tr><td>Category</td><td class="answer">All other app types (not a game, not social or communication)</td></tr>
+  </table>
+
+  <h2>Questionnaire</h2>
+  <table>
+    <tr><th>Topic</th><th>Answer</th></tr>
+    <tr><td>Violence, blood or scary content</td><td class="answer">No</td></tr>
+    <tr><td>Sexual content or nudity</td><td class="answer">No</td></tr>
+    <tr><td>Bad language or crude humour</td><td class="answer">No</td></tr>
+    <tr><td>Drugs, alcohol or tobacco</td><td class="answer">No</td></tr>
+    <tr><td>Gambling, real or simulated</td><td class="answer">No</td></tr>
+    <tr><td>Can users talk to or share content with other users?</td><td class="answer">No. The chat is only with the AI coach</td></tr>
+    <tr><td>Does the app share the user's location with others?</td><td class="answer">No</td></tr>
+    <tr><td>Can users buy digital goods?</td><td class="answer">No</td></tr>
+    <tr><td>Is it a web browser or search engine?</td><td class="answer">No</td></tr>
+    <tr><td>Is it mainly a news or education product?</td><td class="answer">No</td></tr>
+  </table>
+  <p>With these answers the expected result is the lowest rating (Everyone / PEGI 3). Google shows the final rating when you submit.</p>
+  <div class="check"><b>Check:</b> if a question asks about AI-generated content or an AI chatbot, answer Yes. The coach's replies are written by an AI.</div>
+</section>
+
+
+<!-- ============================================================
+     PAGE: TARGET AUDIENCE   link: #/target-audience
+     ============================================================ -->
+<section class="page" id="target-audience">
+  <h1>Target audience answers</h1>
+  <p class="small">Play Console &gt; Policy &gt; App content &gt; Target audience and content. Play only opens this section after the Ads and App access sections are done.</p>
+
+  <table>
+    <tr><th>Question</th><th>Answer</th></tr>
+    <tr><td>Target age group</td><td class="answer">18 and over only</td></tr>
+    <tr><td>Could your store listing unintentionally appeal to children?</td><td class="answer">No</td></tr>
+  </table>
+
+  <h2>Why 18 and over</h2>
+  <ul>
+    <li>The first habit is going to the gym, and the health check is written for adults.</li>
+    <li>Picking any age group under 13 puts the app under Google's Families policy, which adds strict rules.</li>
+    <li>It matches the privacy policy, which says the app is for adults.</li>
+  </ul>
+  <div class="check"><b>Keep the listing consistent:</b> do not use cartoon characters or child-like art in the icon and screenshots. Google can reject the "No" answer if the listing looks made for children.</div>
+</section>
+
+
+<!-- ============================================================
+     PAGE: OTHER DECLARATIONS   link: #/other
+     ============================================================ -->
+<section class="page" id="other">
+  <h1>Other declarations</h1>
+  <p class="small">The rest of the App content page. Do Ads and App access first.</p>
+
+  <table>
+    <tr><th>Section</th><th>Answer</th></tr>
+    <tr><td>Privacy policy</td><td class="answer">The public URL of this file, ending in #/privacy</td></tr>
+    <tr><td>Ads</td><td class="answer">No, my app does not contain ads</td></tr>
+    <tr><td>App access</td><td class="answer">All functionality is available without special access (there is no login)</td></tr>
+    <tr><td>Advertising ID</td><td class="answer">No, the app does not use an advertising ID</td></tr>
+    <tr><td>Health apps</td><td class="answer">Tick the fitness category under Health and fitness. Leave all medical categories unticked</td></tr>
+    <tr><td>Financial features</td><td class="answer">None</td></tr>
+    <tr><td>Government apps</td><td class="answer">No</td></tr>
+    <tr><td>News apps</td><td class="answer">No</td></tr>
+  </table>
+
+  <div class="check"><b>Privacy policy URL:</b> Google needs a public web address that anyone can open, in any country, without a login. A PDF is not accepted. Upload this file to a public host first.</div>
+  <div class="check"><b>Privacy policy inside the app:</b> health apps must also link the privacy policy from inside the app, for example on the My data or Settings screen.</div>
+  <div class="check"><b>AI chat:</b> Google's AI-generated content policy expects apps with an AI chatbot to let users report or flag a bad reply inside the app. Check the current policy and add a simple "Report this reply" option if it applies.</div>
+</section>
+
+</main>
+
+<script>
+  // ---------- Simple # routing ----------
+  // The link "#/privacy" opens the section with id="privacy".
+  // The link "#/" (or no # at all) opens the section with id="home".
+
+  // Tell the CSS that JavaScript is working, so it hides the closed pages.
+  document.documentElement.classList.add('js');
+
+  function showPage() {
+    // 1. Read the page name from the address, for example "#/privacy" -> "privacy"
+    var name = window.location.hash.replace('#/', '').replace('#', '');
+    if (name === '') {
+      name = 'home';
+    }
+
+    // 2. If no page has that name, go back to home
+    var page = document.getElementById(name);
+    if (page === null || !page.classList.contains('page')) {
+      name = 'home';
+      page = document.getElementById('home');
+    }
+
+    // 3. Close every page, then open the one we want
+    var pages = document.querySelectorAll('.page');
+    for (var i = 0; i < pages.length; i++) {
+      pages[i].classList.remove('open');
+    }
+    page.classList.add('open');
+
+    // 4. Highlight the matching link in the menu
+    var links = document.querySelectorAll('nav a');
+    for (var j = 0; j < links.length; j++) {
+      var linkName = links[j].getAttribute('href').replace('#/', '');
+      if (linkName === '') {
+        linkName = 'home';
+      }
+      links[j].classList.toggle('active', linkName === name);
+    }
+
+    // 5. Set the browser tab title and scroll to the top
+    document.title = page.querySelector('h1').textContent + ' - One Habit';
+    window.scrollTo(0, 0);
+  }
+
+  // Run once when the file opens, and again every time the # part changes
+  window.addEventListener('hashchange', showPage);
+  showPage();
+</script>
+
+</body>
+</html>
