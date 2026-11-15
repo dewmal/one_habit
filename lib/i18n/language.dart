@@ -68,6 +68,12 @@ const Map<String, Map<AppLanguage, String>> _strings = {
     AppLanguage.en: '{n} small steps today. Any one of them counts.',
   },
   'today.log_button': {AppLanguage.en: 'Log how it went'},
+  'plan.title': {AppLanguage.en: 'Plan'},
+  'plan.here': {AppLanguage.en: 'You are here'},
+  'plan.goal': {AppLanguage.en: 'Your goal: {goal}'},
+  'plan.note': {
+    AppLanguage.en: 'This page is view only. Missed days never reset your plan. Changes happen in chat.',
+  },
   'level.intro': {AppLanguage.en: 'Thanks. Here is where we start.'},
   'level.heading': {AppLanguage.en: 'Your starting level'},
   'level.steps_heading': {AppLanguage.en: "Tomorrow's small steps"},

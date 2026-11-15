@@ -68,3 +68,6 @@ List<DayEntry> dummyHistory(DateTime today) {
     ),
   ];
 }
+
+/// Goal shown on Plan when the user has not set one yet (dummy).
+final dummyGoal = dummyText('go to the gym every day');

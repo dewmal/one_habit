@@ -5,9 +5,10 @@ import '../app/tabs.dart';
 import '../components/bottom_nav.dart';
 import '../i18n/language.dart';
 import 'chat_page.dart';
+import 'plan_page.dart';
 import 'today_page.dart';
 
-/// The four tabs with the bottom nav. Plan and History are added in their screen commits.
+/// The four tabs with the bottom nav. History is added in its screen commit.
 class MainShell extends ConsumerWidget {
   const MainShell({super.key});
 
@@ -22,7 +23,7 @@ class MainShell extends ConsumerWidget {
         children: const [
           ChatPage(),
           TodayPage(),
-          SizedBox.shrink(),
+          PlanPage(),
           SizedBox.shrink(),
         ],
       ),

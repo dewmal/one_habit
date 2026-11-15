@@ -125,7 +125,7 @@ These are not code. Each one blocks a specific day, so write them before that da
 - [x] Today shows no streak counters, no scores and no tomorrow's tasks
 - [x] `BottomNav`: Chat, Today, Plan, History. Hidden on screens 1 to 4
 - [x] Later app starts open on Today, not Welcome
-- [ ] **Screen 11 Plan** (suggested day): view-only list of five stages, "You are here" on the current one with the move-on rule, the user's goal under the last stage
+- [x] **Screen 11 Plan** (suggested day): view-only list of five stages, "You are here" on the current one with the move-on rule, the user's goal under the last stage
 
 **Done when:** rules tests pass, blocked wording never reaches the screen.
 
