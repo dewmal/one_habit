@@ -1,4 +1,4 @@
-package com.syigen.myself.one_preccent
+package com.syigen.onehabit
 
 import io.flutter.embedding.android.FlutterActivity
 
