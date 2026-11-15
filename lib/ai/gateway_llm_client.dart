@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import 'device_id.dart';
@@ -49,7 +50,14 @@ class GatewayLlmClient implements LlmClient {
             body: jsonEncode(body),
           )
           .timeout(const Duration(seconds: 60));
-    } on Exception {
+    } on Object catch (e) {
+      // The screen shows only the calm message. Debug builds say why.
+      debugPrint(
+        gatewayUrl.isEmpty
+            ? 'Gateway: GATEWAY_URL is not set. Run tool/run_dev.sh, or pass '
+                  '--dart-define=GATEWAY_URL=http://<host>:8080/chat'
+            : 'Gateway: could not reach $gatewayUrl ($e)',
+      );
       throw const AiException('no_connection');
     }
 
