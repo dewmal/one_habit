@@ -23,6 +23,15 @@ final languageProvider = NotifierProvider<LanguageController, AppLanguage>(
 const Map<String, Map<AppLanguage, String>> _strings = {
   'app.name': {AppLanguage.en: 'Habit Agent', AppLanguage.si: 'Habit Agent'},
   'lang.label': {AppLanguage.en: 'English', AppLanguage.si: 'සිංහල'},
+  'welcome.promise': {
+    AppLanguage.en:
+        "One small step a day. I'll help you build a habit that lasts.",
+  },
+  'welcome.ai_note': {
+    AppLanguage.en:
+        "I'm an AI coach, not a person. What you tell me stays on this phone.",
+  },
+  'welcome.start': {AppLanguage.en: 'Start'},
 };
 
 /// Looks up a string key in the given language.
