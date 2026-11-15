@@ -80,8 +80,8 @@ These are not code. Each one blocks a specific day, so write them before that da
 
 ### Wed Nov 18 — Getting to know you (screens 1, 2, 3)
 
-- [ ] **Screen 1 Welcome:** sunset illustration, app name, one-line promise, AI and privacy note, language switch, Start button (`MainButton`)
-- [ ] AI note is visible without scrolling `[never cut]`
+- [x] **Screen 1 Welcome:** sunset illustration, app name, one-line promise, AI and privacy note, language switch, Start button (`MainButton`)
+- [x] AI note is visible without scrolling `[never cut]`
 - [ ] Welcome writes the language to the profile table and shows only on first run
 - [ ] **Screen 2 First questions:** General chat in onboarding mode, no bottom nav
 - [ ] User types the goal in their own words, saved to the habit table
