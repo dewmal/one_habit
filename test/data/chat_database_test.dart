@@ -87,4 +87,43 @@ void main() {
     expect(AppDatabase.tableNames, containsAll(['chat', 'chat_message']));
     expect(AppDatabase.tableNames, isNot(contains('chat_history')));
   });
+
+  test('wipe leaves every table empty', () async {
+    final db = await open();
+    final habit = await db.createHabit(pluginId: 'fitness', name: 'Fitness');
+    final chat = await db.createChat(habit, 'general', 'General');
+    await db.addMessage(chat, 'user', text: 'a');
+    await db.savePlan(habit, stageIndex: 0, tasks: ['x']);
+    await db.saveDay(habit, date: '2026-11-16', results: '{}');
+    await db.saveProfile({'language': 'en'});
+
+    await db.wipe();
+
+    for (final table in AppDatabase.tableNames) {
+      expect(await db.rows(table), isEmpty, reason: table);
+    }
+  });
+
+  test('deleting a habit removes its chats, messages, plan and log', () async {
+    final db = await open();
+    final habit = await db.createHabit(pluginId: 'fitness', name: 'Fitness');
+    final chat = await db.createChat(habit, 'general', 'General');
+    await db.addMessage(chat, 'user', text: 'a');
+    await db.savePlan(habit, stageIndex: 0, tasks: ['x']);
+    await db.saveDay(habit, date: '2026-11-16', results: '{}');
+    await db.saveDay(habit, date: '2026-11-16', results: '{"0":"done"}');
+    expect((await db.logsOf(habit)).length, 1);
+
+    await db.deleteHabit(habit);
+
+    for (final table in [
+      'habit',
+      'chat',
+      'chat_message',
+      'plan',
+      'daily_log',
+    ]) {
+      expect(await db.rows(table), isEmpty, reason: table);
+    }
+  });
 }

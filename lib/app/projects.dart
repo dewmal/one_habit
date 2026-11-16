@@ -47,7 +47,17 @@ class ProjectsState {
 
   bool get hasProject => projects.isNotEmpty;
 
-  Project get current => projects.firstWhere((p) => p.id == currentId);
+  /// An empty placeholder while no habit exists (before Start, or for a
+  /// frame after "Delete everything"). Screens that need a habit are not
+  /// shown then.
+  static const _none = Project(
+    id: 0,
+    name: '',
+    chats: [ChatInfo(id: 0, title: 'General', general: true)],
+  );
+
+  Project get current =>
+      projects.where((p) => p.id == currentId).firstOrNull ?? _none;
 
   ChatInfo get currentChat => current.chats.firstWhere(
     (c) => c.id == currentChatId,
@@ -152,6 +162,27 @@ class ProjectsController extends Notifier<ProjectsState> {
 
   void openGeneral() => selectChat(state.current.generalChat.id);
 
+  /// Deletes every chat of every habit. Topic chats disappear and General
+  /// stays, empty.
+  Future<void> deleteAllChats() async {
+    for (final project in state.projects) {
+      for (final chat in project.chats) {
+        await _db.deleteChat(chat.id);
+      }
+    }
+    final current = state.currentId;
+    state = ProjectsState(
+      projects: [
+        for (final p in state.projects)
+          Project(id: p.id, name: p.name, chats: [p.generalChat]),
+      ],
+      currentId: current,
+      currentChatId: state.current.generalChat.id,
+    );
+    ref.invalidate(topicChatsProvider);
+    await ref.read(chatProvider.notifier).clearMessages();
+  }
+
   /// Opens the chat with this name, or creates it. Returns false if the
   /// name is empty.
   Future<bool> startChat(String name) async {
@@ -192,7 +223,10 @@ final projectsProvider = NotifierProvider<ProjectsController, ProjectsState>(
 /// yes decide.
 class TopicChats extends Notifier<Map<int, List<ChatMessage>>> {
   @override
-  Map<int, List<ChatMessage>> build() => {};
+  Map<int, List<ChatMessage>> build() {
+    ref.watch(startupProvider);
+    return {};
+  }
 
   AppDatabase get _db => ref.read(databaseProvider);
 

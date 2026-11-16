@@ -21,7 +21,7 @@ void main() {
       overrides: [
         llmProvider.overrideWithValue(TestLlmClient()),
         databaseProvider.overrideWithValue(db),
-        startupProvider.overrideWithValue(startup),
+        startupOverride(startup),
       ],
     );
     addTearDown(container.dispose);

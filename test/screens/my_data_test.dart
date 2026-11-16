@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:one_preccent/app/app_state.dart';
 import 'package:one_preccent/app/day_state.dart';
+import 'package:one_preccent/data/app_database.dart';
 import 'package:one_preccent/main.dart';
 import 'package:one_preccent/plugins/fitness_plugin.dart';
 import 'package:one_preccent/screens/my_data_page.dart';
@@ -16,13 +17,14 @@ void main() {
   testWidgets(
     'delete really removes the daily log, and delete everything returns to Welcome',
     (tester) async {
+      final database = seededDatabase();
       tester.view.physicalSize = const Size(390 * 3, 844 * 3);
       tester.view.devicePixelRatio = 3;
       addTearDown(tester.view.reset);
 
       await tester.pumpWidget(
         ProviderScope(
-          overrides: testAiOverrides(),
+          overrides: testAiOverrides(database: database),
           child: const HabitAgentApp(),
         ),
       );
@@ -87,6 +89,9 @@ void main() {
       await tester.tap(find.text('Delete').last);
       await tester.pumpAndSettle();
 
+      for (final table in AppDatabase.tableNames) {
+        expect(await database.rows(table), isEmpty, reason: table);
+      }
       expect(find.text('Start'), findsOneWidget);
       expect(container.read(appProvider).phase, AppPhase.welcome);
       expect(tester.takeException(), isNull);

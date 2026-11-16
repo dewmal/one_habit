@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 
 import 'app_database.dart';
 
@@ -57,5 +58,23 @@ class Startup {
   }
 }
 
-/// Overridden in main() with [Startup.load], and in tests with seeded rows.
-final startupProvider = Provider<Startup>((ref) => const Startup());
+/// Holds what was read at start. Controllers watch it, so after "Delete
+/// everything" clears it they all rebuild empty.
+class StartupController extends Notifier<Startup> {
+  StartupController([this._initial = const Startup()]);
+
+  final Startup _initial;
+
+  @override
+  Startup build() => _initial;
+
+  void clear() => state = const Startup();
+}
+
+/// Overridden in main() with [startupOverride], and in tests with seeded rows.
+final startupProvider = NotifierProvider<StartupController, Startup>(
+  StartupController.new,
+);
+
+Override startupOverride(Startup startup) =>
+    startupProvider.overrideWith(() => StartupController(startup));

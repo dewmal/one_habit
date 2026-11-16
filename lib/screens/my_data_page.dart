@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../app/app_state.dart';
 import '../app/day_state.dart';
 import '../app/settings_state.dart';
+import '../app/projects.dart';
 import '../chat/chat_controller.dart';
+import '../data/database_provider.dart';
+import '../data/startup.dart';
 import '../i18n/language.dart';
 import '../theme/app_theme.dart';
 
@@ -97,12 +99,14 @@ class MyDataPage extends ConsumerWidget {
     );
     if (!ok || !context.mounted) return;
 
-    ref.read(settingsProvider.notifier).reset();
-    ref.read(chatProvider.notifier).reset();
-    ref.read(dayProvider.notifier).clearAll();
-    // Close My data and Settings, then go back to the first screen.
+    // Close My data and Settings first, then remove the file and the key.
+    // Clearing the startup data makes every controller start empty, and the
+    // app returns to Welcome.
+    // The page is gone after popUntil, so the container is taken first.
+    final container = ProviderScope.containerOf(context);
     Navigator.of(context).popUntil((route) => route.isFirst);
-    ref.read(appProvider.notifier).resetToWelcome();
+    await container.read(databaseProvider).wipe();
+    container.read(startupProvider.notifier).clear();
   }
 }
 
@@ -174,7 +178,7 @@ class _SectionRow extends ConsumerWidget {
     );
   }
 
-  List<String> _lines(WidgetRef ref, AppLanguage language) {
+  Future<List<String>> _lines(WidgetRef ref, AppLanguage language) async {
     switch (section) {
       case DataSection.about:
         final s = ref.read(settingsProvider);
@@ -209,16 +213,40 @@ class _SectionRow extends ConsumerWidget {
             '${e.date.day}/${e.date.month}: ${e.results.length} result(s)${e.feeling == null ? '' : ', ${e.feeling!.name}'}',
         ];
       case DataSection.chat:
-        final c = ref.read(chatProvider);
-        return [
-          for (final m in c.messages)
-            '${m.fromAgent ? 'Coach' : 'You'}: ${m.text.values.first}',
-        ];
+        return await _chatLines(ref, language);
     }
   }
 
-  void _view(BuildContext context, WidgetRef ref, AppLanguage language) {
-    final lines = _lines(ref, language);
+  /// Every chat of every habit, read from the database.
+  Future<List<String>> _chatLines(WidgetRef ref, AppLanguage language) async {
+    final db = ref.read(databaseProvider);
+    final lines = <String>[];
+    for (final habit in await db.habits()) {
+      for (final chat in await db.chatsOf(habit['id'] as int)) {
+        final messages = await db.messagesOf(chat['id'] as int);
+        if (messages.isEmpty) continue;
+        lines.add('${chat['title']}');
+        for (final row in messages) {
+          final who = row['role'] == 'assistant' ? 'Coach' : 'You';
+          final text = switch (row['kind']) {
+            'fixed' => resolve(textOf(row['text_key'] as String), language),
+            'card' => '[${row['card_type']} card]',
+            _ => row['text'] as String,
+          };
+          lines.add('$who: $text');
+        }
+      }
+    }
+    return lines;
+  }
+
+  Future<void> _view(
+    BuildContext context,
+    WidgetRef ref,
+    AppLanguage language,
+  ) async {
+    final lines = await _lines(ref, language);
+    if (!context.mounted) return;
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -272,7 +300,7 @@ class _SectionRow extends ConsumerWidget {
       case DataSection.log:
         ref.read(dayProvider.notifier).clearLog();
       case DataSection.chat:
-        ref.read(chatProvider.notifier).clearMessages();
+        await ref.read(projectsProvider.notifier).deleteAllChats();
     }
   }
 }

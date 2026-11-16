@@ -45,7 +45,7 @@ void main() {
       overrides: [
         llmProvider.overrideWithValue(client),
         databaseProvider.overrideWithValue(db),
-        startupProvider.overrideWithValue(await Startup.load(db)),
+        startupOverride(await Startup.load(db)),
       ],
     );
     addTearDown(container.dispose);

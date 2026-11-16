@@ -33,6 +33,10 @@ abstract class AppDatabase {
 
   Future<void> close();
 
+  /// "Delete everything": the file, the key and every row are gone, and a new
+  /// empty database is ready for the next Start.
+  Future<void> wipe();
+
   // Habits
 
   /// Saves a new habit and returns its id. Its General chat is made right

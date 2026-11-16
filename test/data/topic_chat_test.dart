@@ -45,7 +45,7 @@ void main() {
       overrides: [
         llmProvider.overrideWithValue(client),
         databaseProvider.overrideWithValue(db),
-        startupProvider.overrideWithValue(await Startup.load(db)),
+        startupOverride(await Startup.load(db)),
       ],
     );
     addTearDown(container.dispose);
@@ -84,5 +84,20 @@ void main() {
     final cards = (await db.messagesOf(general))
         .where((m) => m['card_type'] == 'step_up');
     expect(cards.length, 1);
+  });
+
+  test('deleting every chat removes topic chats and empties General', () async {
+    final (container, db, chat) = await setup(_Recorder());
+    await container.read(topicChatsProvider.notifier).send(chat, 'Diet', 'hi');
+    final general = container.read(projectsProvider).current.generalChat.id;
+    await db.addMessage(general, 'user', text: 'a');
+
+    await container.read(projectsProvider.notifier).deleteAllChats();
+
+    expect(await db.messagesOf(chat), isEmpty);
+    expect(await db.messagesOf(general), isEmpty);
+    final chats = await db.chatsOf(1);
+    expect(chats.map((c) => c['kind']), ['general']);
+    expect(container.read(projectsProvider).current.chats.length, 1);
   });
 }

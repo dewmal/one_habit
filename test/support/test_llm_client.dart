@@ -36,7 +36,7 @@ testAiOverrides({MemoryAppDatabase? database, LlmClient? client}) {
   return [
     llmProvider.overrideWithValue(client ?? TestLlmClient()),
     databaseProvider.overrideWithValue(db),
-    startupProvider.overrideWithValue(
+    startupOverride(
       Startup(
         habits: db.tables['habit']!,
         chats: db.tables['chat']!,

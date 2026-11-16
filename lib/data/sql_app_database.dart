@@ -14,9 +14,13 @@ import 'app_database.dart';
 /// many chats and a chat has many messages (docs/One habit Data Saving and
 /// Chat Management (Flutter).md).
 class SqlAppDatabase implements AppDatabase {
-  SqlAppDatabase._(this._db);
+  SqlAppDatabase._(this._db, [this._path, this._storage]);
 
-  final Database _db;
+  Database _db;
+
+  /// Where the file is and where the key is kept. Null for a test database.
+  final String? _path;
+  final FlutterSecureStorage? _storage;
 
   static const _keyName = 'habit_agent_db_key';
   static const _fileName = 'habit_agent.db';
@@ -59,7 +63,7 @@ class SqlAppDatabase implements AppDatabase {
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
-    return SqlAppDatabase._(db);
+    return SqlAppDatabase._(db, dbPath, storage);
   }
 
   /// Opens a plain, unencrypted database through any sqflite factory. Tests
@@ -287,6 +291,26 @@ class SqlAppDatabase implements AppDatabase {
 
   @override
   Future<void> close() => _db.close();
+
+  /// Closes the database, deletes the file and deletes the key. The app then
+  /// needs a database to show Welcome, so an empty one is made with a new
+  /// random key. None of the old data or the old key is left.
+  @override
+  Future<void> wipe() async {
+    final path = _path;
+    final storage = _storage;
+    if (path == null || storage == null) {
+      // A test database has no file or key: empty every table.
+      for (final table in AppDatabase.tableNames) {
+        await _db.delete(table);
+      }
+      return;
+    }
+    await _db.close();
+    await deleteDatabase(path);
+    await storage.delete(key: _keyName);
+    _db = (await _openAt(path, storage))._db;
+  }
 
   @override
   Future<int> createHabit({required String pluginId, required String name}) =>

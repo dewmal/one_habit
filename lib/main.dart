@@ -18,7 +18,7 @@ Future<void> main() async {
     ProviderScope(
       overrides: [
         databaseProvider.overrideWithValue(database),
-        startupProvider.overrideWithValue(startup),
+        startupOverride(startup),
       ],
       child: const HabitAgentApp(),
     ),

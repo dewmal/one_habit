@@ -36,9 +36,6 @@ class AppController extends Notifier<AppState> {
 
   /// Level card "Looks good": the user enters the main app.
   void finishOnboarding() => state = state.copyWith(phase: AppPhase.main);
-
-  /// "Delete everything": back to the first screen.
-  void resetToWelcome() => state = state.copyWith(phase: AppPhase.welcome);
 }
 
 final appProvider = NotifierProvider<AppController, AppState>(

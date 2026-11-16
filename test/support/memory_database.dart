@@ -30,6 +30,13 @@ class MemoryAppDatabase implements AppDatabase {
   Future<void> close() async {}
 
   @override
+  Future<void> wipe() async {
+    for (final table in tables.values) {
+      table.clear();
+    }
+  }
+
+  @override
   Future<int> createHabit({
     required String pluginId,
     required String name,
