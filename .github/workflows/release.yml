@@ -22,6 +22,8 @@ concurrency:
 jobs:
   android:
     runs-on: ubuntu-latest
+    env:
+      GATEWAY_URL: ${{ vars.GATEWAY_URL }}
     steps:
       - name: Work out tag and version
         id: meta
@@ -67,15 +69,25 @@ jobs:
             echo "storeFile=upload-keystore.jks"
           } > android/key.properties
 
+      - name: Check gateway URL
+        run: |
+          # Fail rather than ship a build that cannot reach the gateway.
+          if [ -z "$GATEWAY_URL" ]; then
+            echo "::error::GATEWAY_URL is not set. Add it under Settings > Secrets and variables > Actions > Variables (e.g. https://<domain>/chat)."
+            exit 1
+          fi
+
       - name: Build APK
         run: >
           flutter build apk --release
+          --dart-define=GATEWAY_URL=$GATEWAY_URL
           --build-name=${{ steps.meta.outputs.version }}
           --build-number=${{ steps.meta.outputs.build_number }}
 
       - name: Build App Bundle
         run: >
           flutter build appbundle --release
+          --dart-define=GATEWAY_URL=$GATEWAY_URL
           --build-name=${{ steps.meta.outputs.version }}
           --build-number=${{ steps.meta.outputs.build_number }}
 
