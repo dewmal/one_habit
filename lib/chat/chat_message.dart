@@ -36,6 +36,17 @@ class QuestionCardData extends ChatCard {
   Map<String, Object?> toJson() => {'index': index};
 }
 
+/// A plain note in a chat, such as "I suggested a bigger step in General".
+class InfoCardData extends ChatCard {
+  const InfoCardData();
+
+  @override
+  String get type => 'info';
+
+  @override
+  Map<String, Object?> toJson() => {};
+}
+
 class LevelCardData extends ChatCard {
   const LevelCardData({
     required this.level,
@@ -270,6 +281,13 @@ ChatMessage _cardMessage(int id, String type, Map<String, dynamic> data) {
           ChatReply(value: 'resume', label: textOf('hardstop.resume')),
         ],
         card: const HardStopCardData(),
+      );
+    case 'info':
+      return ChatMessage(
+        id: id,
+        fromAgent: true,
+        text: textOf('topic.suggestion_body'),
+        card: const InfoCardData(),
       );
     default:
       final initial = (data['initial'] as Map<String, dynamic>?) ?? const {};

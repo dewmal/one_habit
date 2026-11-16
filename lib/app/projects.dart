@@ -1,7 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../ai/llm_client.dart';
 import '../chat/chat_controller.dart';
+import '../chat/history.dart';
 import '../data/app_database.dart';
 import '../data/database_provider.dart';
 import '../data/startup.dart';
@@ -133,6 +135,18 @@ class ProjectsController extends Notifier<ProjectsState> {
       currentChatId: chatId,
     );
     ref.read(tabProvider.notifier).select(AppTab.chat);
+    if (state.current.generalChat.id == chatId) _deliverStepUp();
+  }
+
+  /// A topic chat asked for a bigger step: General shows the step-up card
+  /// once, then the flag goes back to 0.
+  Future<void> _deliverStepUp() async {
+    final id = state.current.id;
+    final rows = await _db.habits();
+    final habit = rows.where((h) => h['id'] == id).firstOrNull;
+    if (habit == null || habit['pending_step_up'] != 1) return;
+    await _db.updateHabit(id, {'pending_step_up': 0});
+    await ref.read(chatProvider.notifier).openStepUp();
   }
 
   void openGeneral() => selectChat(state.current.generalChat.id);
@@ -171,46 +185,70 @@ final projectsProvider = NotifierProvider<ProjectsController, ProjectsState>(
   ProjectsController.new,
 );
 
-/// One message in a topic chat.
-class TopicMessage {
-  const TopicMessage({
-    required this.fromUser,
-    required this.text,
-    this.suggestion = false,
-  });
-
-  final bool fromUser;
-  final String text;
-
-  /// True when this coach message asked General for a plan change.
-  final bool suggestion;
-}
-
-/// Messages of the topic chats, by chat id. A topic chat can only suggest:
-/// a suggestion is kept in [pendingSuggestion] until General is opened, where
-/// the rules engine and the user's yes decide.
-class TopicChats extends Notifier<Map<int, List<TopicMessage>>> {
+/// Messages of the topic chats, by chat row id. A topic chat can only
+/// suggest: a bigger step sets `habit.pending_step_up`, and General shows the
+/// step-up card the next time it opens, where the rules engine and the user's
+/// yes decide.
+class TopicChats extends Notifier<Map<int, List<ChatMessage>>> {
   @override
-  Map<int, List<TopicMessage>> build() => {};
+  Map<int, List<ChatMessage>> build() => {};
 
-  bool pendingSuggestion = false;
+  AppDatabase get _db => ref.read(databaseProvider);
 
-  void _add(int chatId, TopicMessage m) => state = {
-    ...state,
-    chatId: [...(state[chatId] ?? const []), m],
-  };
+  /// Loads the saved messages when a topic chat opens.
+  Future<void> load(int chatId) async {
+    final rows = await _db.messagesOf(chatId);
+    state = {
+      ...state,
+      chatId: [for (final r in rows) messageFromRow(r)],
+    };
+  }
+
+  /// Saves one message, then shows it.
+  Future<void> _save(
+    int chatId,
+    String role, {
+    String text = '',
+    String? textKey,
+    ChatCard? card,
+  }) async {
+    final kind = card != null ? 'card' : (textKey != null ? 'fixed' : 'text');
+    final cardData = card == null ? null : jsonEncode(card.toJson());
+    final id = await _db.addMessage(
+      chatId,
+      role,
+      kind: kind,
+      text: text,
+      textKey: textKey,
+      cardType: card?.type,
+      cardData: cardData,
+    );
+    final message = messageFromRow({
+      'id': id,
+      'role': role,
+      'kind': kind,
+      'text': text,
+      'text_key': textKey,
+      'card_type': card?.type,
+      'card_data': cardData,
+      'card_answer': null,
+      'status': 'sent',
+    });
+    state = {
+      ...state,
+      chatId: [...(state[chatId] ?? const []), message],
+    };
+  }
 
   Future<void> send(int chatId, String topic, String raw) async {
     final text = raw.trim();
     if (text.isEmpty) return;
-    final history = [
-      for (final m in state[chatId] ?? const <TopicMessage>[])
-        ChatTurn(role: m.fromUser ? 'user' : 'assistant', content: m.text),
-      ChatTurn(role: 'user', content: text),
-    ];
-    _add(chatId, TopicMessage(fromUser: true, text: text));
+    await _save(chatId, 'user', text: text);
     final chat = ref.read(chatProvider);
     final language = ref.read(languageProvider);
+    // The same last-10 rule as the General chat, so a long topic chat never
+    // goes over the gateway limit.
+    final history = buildHistory(await _db.recentTextMessages(chatId));
     try {
       final reply = await ref
           .read(llmProvider)
@@ -218,35 +256,29 @@ class TopicChats extends Notifier<Map<int, List<TopicMessage>>> {
             language: language == AppLanguage.si ? 'Sinhala' : 'English',
             summary:
                 'Goal: ${chat.goal ?? ''}. Level: ${chat.level ?? ''}. '
+                '${chat.healthLock ? 'Keep very gentle. ' : ''}'
                 'This is the "$topic" topic chat.',
             history: history,
           );
-      if (isBlocked(reply.text)) return;
-      _add(chatId, TopicMessage(fromUser: false, text: reply.text));
+      if (isBlocked(reply.text)) {
+        await _save(chatId, 'assistant', textKey: 'chat.safe_fallback');
+        return;
+      }
+      await _save(chatId, 'assistant', text: reply.text);
       if (reply.wantsBigger) {
-        pendingSuggestion = true;
-        _add(
-          chatId,
-          const TopicMessage(fromUser: false, text: '', suggestion: true),
-        );
+        await _db.updateHabit(ref.read(projectsProvider).current.id, {
+          'pending_step_up': 1,
+        });
+        await _save(chatId, 'assistant', card: const InfoCardData());
       }
     } catch (_) {
-      _add(
-        chatId,
-        TopicMessage(fromUser: false, text: tr('chat.no_connection', language)),
-      );
+      await _save(chatId, 'assistant', textKey: 'chat.no_connection');
     }
   }
 
-  /// "Open General": go there and hand over a waiting suggestion.
-  void openGeneral() {
-    ref.read(projectsProvider.notifier).openGeneral();
-    if (pendingSuggestion) {
-      pendingSuggestion = false;
-      ref.read(chatProvider.notifier).openStepUp();
-    }
-  }
+  /// "Open General": go there. A waiting suggestion shows the step-up card.
+  void openGeneral() => ref.read(projectsProvider.notifier).openGeneral();
 }
 
 final topicChatsProvider =
-    NotifierProvider<TopicChats, Map<int, List<TopicMessage>>>(TopicChats.new);
+    NotifierProvider<TopicChats, Map<int, List<ChatMessage>>>(TopicChats.new);
