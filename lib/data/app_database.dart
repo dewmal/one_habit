@@ -20,12 +20,36 @@ class AppDatabase {
   static const _fileName = 'habit_agent.db';
   static const _schemaVersion = 2;
 
+  /// Opens the database. If the key is missing or the file cannot be opened,
+  /// the file is treated as a fresh install: it is deleted and made again, and
+  /// the app shows Welcome.
   static Future<AppDatabase> open({
     String? path,
     FlutterSecureStorage storage = const FlutterSecureStorage(),
   }) async {
-    final key = await _loadOrCreateKey(storage);
     final dbPath = path ?? p.join(await getDatabasesPath(), _fileName);
+    String? existingKey;
+    try {
+      existingKey = await storage.read(key: _keyName);
+    } catch (_) {}
+    if (existingKey == null) {
+      // A file without its key can never be opened.
+      await deleteDatabase(dbPath);
+    }
+    try {
+      return await _openAt(dbPath, storage);
+    } catch (_) {
+      await deleteDatabase(dbPath);
+      await storage.delete(key: _keyName);
+      return _openAt(dbPath, storage);
+    }
+  }
+
+  static Future<AppDatabase> _openAt(
+    String dbPath,
+    FlutterSecureStorage storage,
+  ) async {
+    final key = await _loadOrCreateKey(storage);
     final db = await openDatabase(
       dbPath,
       password: key,
