@@ -1,4 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import 'secure_storage.dart';
+
 import 'package:sqflite_sqlcipher/sqflite.dart' show DatabaseFactory;
 
 import 'sql_app_database.dart';
@@ -10,7 +13,7 @@ abstract class AppDatabase {
   /// Opens the encrypted database on the phone.
   static Future<AppDatabase> open({
     String? path,
-    FlutterSecureStorage storage = const FlutterSecureStorage(),
+    FlutterSecureStorage storage = secureStorage,
   }) => SqlAppDatabase.open(path: path, storage: storage);
 
   /// Opens a plain database through any sqflite factory (tests only).

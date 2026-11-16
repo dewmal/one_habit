@@ -1,7 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import 'secure_storage.dart';
+
 import 'package:path/path.dart' as p;
 import 'package:sqflite_sqlcipher/sqflite.dart';
 
@@ -31,7 +36,7 @@ class SqlAppDatabase implements AppDatabase {
   /// the app shows Welcome.
   static Future<SqlAppDatabase> open({
     String? path,
-    FlutterSecureStorage storage = const FlutterSecureStorage(),
+    FlutterSecureStorage storage = secureStorage,
   }) async {
     final dbPath = path ?? p.join(await getDatabasesPath(), _fileName);
     String? existingKey;
@@ -63,6 +68,7 @@ class SqlAppDatabase implements AppDatabase {
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
+    await _excludeFromBackup(dbPath);
     return SqlAppDatabase._(db, dbPath, storage);
   }
 
@@ -97,6 +103,16 @@ class SqlAppDatabase implements AppDatabase {
         await db.execute(statement);
       }
     }
+  }
+
+  /// iOS only: keeps the database file out of iCloud and computer backups.
+  /// The only backup is the one the user turns on.
+  static Future<void> _excludeFromBackup(String path) async {
+    if (!Platform.isIOS) return;
+    try {
+      await const MethodChannel('habit_agent/backup')
+          .invokeMethod<void>('excludeFromBackup', path);
+    } catch (_) {}
   }
 
   static Future<String> _loadOrCreateKey(FlutterSecureStorage storage) async {

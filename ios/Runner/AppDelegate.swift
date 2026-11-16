@@ -12,5 +12,27 @@ import UIKit
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+
+    // The database file stays out of iCloud and computer backups. The only
+    // backup is the one the user turns on.
+    let channel = FlutterMethodChannel(
+      name: "habit_agent/backup",
+      binaryMessenger: engineBridge.applicationRegistrar.messenger()
+    )
+    channel.setMethodCallHandler { call, result in
+      guard call.method == "excludeFromBackup", let path = call.arguments as? String else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      var url = URL(fileURLWithPath: path)
+      var values = URLResourceValues()
+      values.isExcludedFromBackup = true
+      do {
+        try url.setResourceValues(values)
+        result(nil)
+      } catch {
+        result(FlutterError(code: "backup", message: error.localizedDescription, details: nil))
+      }
+    }
   }
 }
