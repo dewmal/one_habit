@@ -8,6 +8,7 @@ import 'package:one_preccent/app/dummy_data.dart';
 import 'package:one_preccent/app/settings_state.dart';
 import 'package:one_preccent/main.dart';
 
+import '../support/menu.dart';
 import '../support/test_llm_client.dart';
 
 void main() {
@@ -31,6 +32,7 @@ void main() {
       container.read(appProvider.notifier).finishOnboarding();
       await tester.pumpAndSettle();
 
+      await openMenu(tester);
       await tester.tap(find.byIcon(Icons.tune));
       await tester.pumpAndSettle();
       expect(find.text('Most reminders a day'), findsOneWidget);

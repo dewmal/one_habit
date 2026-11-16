@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../app/day_state.dart';
 import '../app/dummy_data.dart';
 import '../chat/chat_controller.dart';
+import '../app/projects.dart';
+import '../components/screen_title_bar.dart';
 import '../i18n/language.dart';
 import '../plugins/fitness_plugin.dart';
 import '../theme/app_theme.dart';
@@ -29,11 +31,10 @@ class PlanPage extends ConsumerWidget {
       child: ListView(
         padding: const EdgeInsets.all(AppSpacing.screen),
         children: [
-          Text(tr('plan.title', language), style: AppText.screenTitle),
-          const SizedBox(height: 4),
-          Text(
-            '${resolve(dummyProjectName, language)} · ${resolve(level.label, language)}',
-            style: AppText.bodyMuted,
+          ScreenTitleBar(
+            title: tr('plan.title', language),
+            subtitle:
+                '${ref.watch(projectsProvider).current.name} · ${resolve(level.label, language)}',
           ),
           const SizedBox(height: AppSpacing.gap16),
           for (final stage in stages) ...[

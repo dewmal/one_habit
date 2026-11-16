@@ -8,6 +8,7 @@ import 'package:one_preccent/app/dummy_data.dart';
 import 'package:one_preccent/main.dart';
 import 'package:one_preccent/screens/my_data_page.dart';
 
+import '../support/menu.dart';
 import '../support/test_llm_client.dart';
 
 void main() {
@@ -32,6 +33,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(container.read(dayProvider).history, isNotEmpty);
 
+      await openMenu(tester);
       await tester.tap(find.byIcon(Icons.tune));
       await tester.pumpAndSettle();
       await tester.tap(find.text('My data'));

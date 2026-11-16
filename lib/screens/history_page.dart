@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app/day_state.dart';
+import '../components/screen_title_bar.dart';
 import '../i18n/language.dart';
 import '../theme/app_theme.dart';
 
@@ -31,9 +32,10 @@ class HistoryPage extends ConsumerWidget {
       child: ListView(
         padding: const EdgeInsets.all(AppSpacing.screen),
         children: [
-          Text(tr('history.title', language), style: AppText.screenTitle),
-          const SizedBox(height: 4),
-          Text(tr('history.subtitle', language), style: AppText.bodyMuted),
+          ScreenTitleBar(
+            title: tr('history.title', language),
+            subtitle: tr('history.subtitle', language),
+          ),
           const SizedBox(height: AppSpacing.gap16),
           for (final entry in rows) ...[
             _DayRow(

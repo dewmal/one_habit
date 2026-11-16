@@ -17,7 +17,7 @@ class AppRoot extends ConsumerWidget {
       case AppPhase.welcome:
         return const WelcomePage();
       case AppPhase.onboarding:
-        // Onboarding is the chat alone, with no bottom nav.
+        // Onboarding is the chat alone, with no menu button.
         return const Scaffold(body: ChatPage());
       case AppPhase.main:
         return const MainShell();

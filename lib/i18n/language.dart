@@ -22,7 +22,7 @@ final languageProvider = NotifierProvider<LanguageController, AppLanguage>(
 /// value falls back to English until the Sinhala text is written (Fri Nov 27).
 /// Screens read text through [tr] or [textOf], never inline literals.
 const Map<String, Map<AppLanguage, String>> _strings = {
-  'app.name': {AppLanguage.en: 'Habit Agent', AppLanguage.si: 'Habit Agent'},
+  'app.name': {AppLanguage.en: 'One habit', AppLanguage.si: 'One habit'},
   'lang.label': {AppLanguage.en: 'English', AppLanguage.si: 'සිංහල'},
   'welcome.promise': {
     AppLanguage.en:
@@ -35,6 +35,35 @@ const Map<String, Map<AppLanguage, String>> _strings = {
   'welcome.start': {AppLanguage.en: 'Start'},
   'chat.general': {AppLanguage.en: 'General'},
   'chat.coach': {AppLanguage.en: 'Your coach · AI'},
+  'menu.open': {AppLanguage.en: 'Menu'},
+  'menu.close': {AppLanguage.en: 'Close'},
+  'menu.habits': {AppLanguage.en: 'Habits'},
+  'menu.more': {AppLanguage.en: 'Show {n} more habits'},
+  'menu.fewer': {AppLanguage.en: 'Show fewer habits'},
+  'menu.ai_note': {
+    AppLanguage.en:
+        'Your coach is an AI. Everything is saved only on this phone.',
+  },
+  'menu.settings': {AppLanguage.en: 'Settings'},
+  'menu.my_data': {AppLanguage.en: 'My data'},
+  'newchat.title': {AppLanguage.en: 'New chat'},
+  'newchat.in': {AppLanguage.en: 'In {habit}'},
+  'newchat.pick': {AppLanguage.en: 'Pick a topic'},
+  'newchat.own': {AppLanguage.en: 'Or name your own'},
+  'newchat.name_hint': {AppLanguage.en: 'Chat name'},
+  'newchat.note': {
+    AppLanguage.en: 'Every chat in this habit shares the same memory, so you never repeat yourself. Only the General chat can change your plan.',
+  },
+  'newchat.start': {AppLanguage.en: 'Start chat'},
+  'topic.empty': {
+    AppLanguage.en: 'Ask anything about this topic. I remember what you told me in General.',
+  },
+  'topic.suggestion_title': {AppLanguage.en: 'Suggestion sent to General'},
+  'topic.suggestion_body': {
+    AppLanguage.en: 'A bigger step is only offered in General, and only with your yes. Your plan only changes in the General chat.',
+  },
+  'topic.open_general': {AppLanguage.en: 'Open General'},
+  'topic.ask_else': {AppLanguage.en: 'Ask something else'},
   'chat.greeting': {AppLanguage.en: 'Hi! What habit would you like to build?'},
   'chat.good_goal': {
     AppLanguage.en:
@@ -86,12 +115,10 @@ const Map<String, Map<AppLanguage, String>> _strings = {
     AppLanguage.en: "Let's take it one small step at a time.",
   },
   'chat.input_hint': {AppLanguage.en: 'Type a message'},
-  'nav.chat': {AppLanguage.en: 'Chat'},
   'nav.today': {AppLanguage.en: 'Today'},
   'nav.plan': {AppLanguage.en: 'Plan'},
   'nav.history': {AppLanguage.en: 'History'},
   'today.title': {AppLanguage.en: 'Today'},
-  'today.settings': {AppLanguage.en: 'Settings'},
   'today.offline': {
     AppLanguage.en: "You're offline. Your steps and logging still work.",
   },
@@ -101,7 +128,7 @@ const Map<String, Map<AppLanguage, String>> _strings = {
   },
   'today.log_button': {AppLanguage.en: 'Log how it went'},
   'plan.title': {AppLanguage.en: 'Plan'},
-  'notif.app': {AppLanguage.en: 'Habit Agent'},
+  'notif.app': {AppLanguage.en: 'One habit'},
   'notif.morning_title': {AppLanguage.en: "Today's small step"},
   'notif.morning_body': {AppLanguage.en: '{task}. That is all for now.'},
   'notif.nothing_today': {AppLanguage.en: 'Nothing planned for today.'},

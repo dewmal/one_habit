@@ -9,7 +9,7 @@ import '../support/test_llm_client.dart';
 
 void main() {
   testWidgets(
-    'Looks good opens Today with only today\'s tasks and the bottom nav',
+    'Looks good opens Today with only today\'s tasks and the menu button',
     (tester) async {
       tester.view.physicalSize = const Size(390 * 3, 844 * 3);
       tester.view.devicePixelRatio = 3;
@@ -46,7 +46,8 @@ void main() {
       expect(find.text('Walk to the gym door'), findsOneWidget);
       expect(find.text('Log how it went'), findsOneWidget);
       expect(find.text('Streak'), findsNothing);
-      expect(find.text('Chat'), findsOneWidget);
+      expect(find.byIcon(Icons.menu), findsOneWidget);
+      expect(find.byIcon(Icons.tune), findsNothing);
 
       await tester.tap(find.text('Walk to the gym door'));
       await tester.pump();

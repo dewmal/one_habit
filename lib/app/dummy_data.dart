@@ -26,9 +26,6 @@ Map<AppLanguage, String> dummyText(String english) => {
   AppLanguage.si: english,
 };
 
-/// The project name shown on Today, from the user's project (dummy).
-final dummyProjectName = dummyText('Improve my fitness');
-
 /// Five past days, newest first, in the same shape as the History design.
 List<DayEntry> dummyHistory(DateTime today) {
   DateTime daysAgo(int n) => DateTime(today.year, today.month, today.day - n);

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../ai/connection_status.dart';
+import '../app/app_state.dart';
+import '../app/projects.dart';
 import '../chat/chat_controller.dart';
 import '../components/info_card.dart';
 import '../components/log_card.dart';
@@ -16,6 +18,7 @@ import '../components/input_bar.dart';
 import '../components/quick_replies.dart';
 import '../i18n/language.dart';
 import 'health_check_page.dart';
+import 'new_chat_page.dart';
 import 'notifications_page.dart';
 import '../theme/app_theme.dart';
 
@@ -40,39 +43,47 @@ class ChatPage extends ConsumerWidget {
     });
     final lastAgentIndex = messages.lastIndexWhere((m) => m.fromAgent);
 
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            ChatHeader(
-              title: tr('chat.general', language),
-              subtitle: tr('chat.coach', language),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _ConnectionDot(language: language),
-                  if (kDebugMode) _DemoMenu(controller: controller),
-                ],
+    // Onboarding is the chat alone: no menu button and no new chat button.
+    final inApp =
+        ref.watch(appProvider.select((s) => s.phase)) == AppPhase.main;
+    final habit = ref.watch(projectsProvider.select((s) => s.current.name));
+
+    // The parent Scaffold (onboarding or MainShell) owns the background and
+    // the side menu.
+    return SafeArea(
+      child: Column(
+        children: [
+          ChatHeader(
+            title: tr('chat.general', language),
+            subtitle: inApp ? '$habit · AI' : tr('chat.coach', language),
+            showMenu: inApp,
+            onNewChat: inApp ? () => openNewChat(Navigator.of(context)) : null,
+            newChatTooltip: tr('newchat.title', language),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _ConnectionDot(language: language),
+                if (kDebugMode) _DemoMenu(controller: controller),
+              ],
+            ),
+          ),
+          Expanded(
+            child: ListView(
+              reverse: true,
+              padding: const EdgeInsets.all(AppSpacing.gap16),
+              children: _newestFirst(
+                messages,
+                lastAgentIndex,
+                language,
+                controller,
               ),
             ),
-            Expanded(
-              child: ListView(
-                reverse: true,
-                padding: const EdgeInsets.all(AppSpacing.gap16),
-                children: _newestFirst(
-                  messages,
-                  lastAgentIndex,
-                  language,
-                  controller,
-                ),
-              ),
-            ),
-            InputBar(
-              hint: tr('chat.input_hint', language),
-              onSend: controller.send,
-            ),
-          ],
-        ),
+          ),
+          InputBar(
+            hint: tr('chat.input_hint', language),
+            onSend: controller.send,
+          ),
+        ],
       ),
     );
   }

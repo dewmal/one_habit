@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:one_preccent/app/app_state.dart';
 import 'package:one_preccent/main.dart';
 
+import '../support/menu.dart';
 import '../support/test_llm_client.dart';
 
 void main() {
@@ -28,7 +29,7 @@ void main() {
       container.read(appProvider.notifier).finishOnboarding();
       await tester.pump();
 
-      await tester.tap(find.text('Plan'));
+      await chooseInMenu(tester, 'Plan');
       await tester.pumpAndSettle();
 
       expect(find.text('You are here'), findsOneWidget);

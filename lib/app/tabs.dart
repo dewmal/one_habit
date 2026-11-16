@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// The four tabs after onboarding. Later app starts open on Today.
+/// The views of the open habit, opened from the side menu: a chat, Today,
+/// Plan or History. Later app starts open on Today.
 enum AppTab { chat, today, plan, history }
 
 class TabController extends Notifier<AppTab> {

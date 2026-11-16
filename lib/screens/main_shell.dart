@@ -1,40 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../app/projects.dart';
 import '../app/tabs.dart';
-import '../components/bottom_nav.dart';
-import '../i18n/language.dart';
+import '../components/side_menu.dart';
 import 'chat_page.dart';
 import 'history_page.dart';
 import 'plan_page.dart';
 import 'today_page.dart';
+import 'topic_chat_page.dart';
 
-/// The four tabs with the bottom nav.
+/// The app after onboarding: one view of the open habit at a time, and a
+/// side menu to move between habits, chats and views.
 class MainShell extends ConsumerWidget {
   const MainShell({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final language = ref.watch(languageProvider);
     final tab = ref.watch(tabProvider);
+    final chat = ref.watch(projectsProvider.select((s) => s.currentChat));
 
+    // General stays mounted so its conversation and scroll position are kept.
     return Scaffold(
+      drawer: const SideMenu(),
       body: IndexedStack(
         index: tab.index,
-        children: const [ChatPage(), TodayPage(), PlanPage(), HistoryPage()],
-      ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: BottomNav(
-          current: tab,
-          labels: [
-            tr('nav.chat', language),
-            tr('nav.today', language),
-            tr('nav.plan', language),
-            tr('nav.history', language),
-          ],
-          onSelect: ref.read(tabProvider.notifier).select,
-        ),
+        children: [
+          chat.general
+              ? const ChatPage()
+              : TopicChatPage(key: ValueKey(chat.id), chat: chat),
+          const TodayPage(),
+          const PlanPage(),
+          const HistoryPage(),
+        ],
       ),
     );
   }

@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../app/dummy_data.dart';
 import '../chat/chat_controller.dart';
 import '../app/day_state.dart';
-import '../app/tabs.dart';
+import '../app/projects.dart';
+import '../components/screen_title_bar.dart';
 import '../components/main_button.dart';
 import '../components/stage_card.dart';
 import '../components/task_tile.dart';
 import '../i18n/language.dart';
 import '../plugins/fitness_plugin.dart';
 import '../theme/app_theme.dart';
-import 'settings_page.dart';
 
-/// Screen 5: only today's tasks. No streaks, scores or tomorrow's tasks.
+/// Screen 10: only today's tasks. No streaks, scores or tomorrow's tasks.
 class TodayPage extends ConsumerWidget {
   const TodayPage({super.key});
 
@@ -32,35 +31,9 @@ class TodayPage extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        tr('today.title', language),
-                        style: AppText.screenTitle,
-                      ),
-                      Text(
-                        resolve(dummyProjectName, language),
-                        style: AppText.bodyMuted,
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton.filled(
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const SettingsPage()),
-                  ),
-                  style: IconButton.styleFrom(
-                    backgroundColor: AppColors.surface,
-                    foregroundColor: AppColors.text,
-                  ),
-                  icon: const Icon(Icons.tune),
-                  tooltip: tr('today.settings', language),
-                ),
-              ],
+            ScreenTitleBar(
+              title: tr('today.title', language),
+              subtitle: ref.watch(projectsProvider).current.name,
             ),
             if (day.offline) ...[
               const SizedBox(height: AppSpacing.gap12),
@@ -97,7 +70,7 @@ class TodayPage extends ConsumerWidget {
                 ref
                     .read(chatProvider.notifier)
                     .openDailyLog(day.tasks, day.results);
-                ref.read(tabProvider.notifier).select(AppTab.chat);
+                ref.read(projectsProvider.notifier).openGeneral();
               },
             ),
             const SizedBox(height: AppSpacing.gap16),

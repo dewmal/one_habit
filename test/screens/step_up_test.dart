@@ -8,6 +8,7 @@ import 'package:one_preccent/app/dummy_data.dart';
 import 'package:one_preccent/chat/chat_controller.dart';
 import 'package:one_preccent/main.dart';
 
+import '../support/menu.dart';
 import '../support/test_llm_client.dart';
 
 void main() {
@@ -27,7 +28,7 @@ void main() {
     container.read(dayProvider.notifier).startDay(dummyStepsFor('beginner'));
     container.read(appProvider.notifier).finishOnboarding();
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Chat'));
+    await chooseInMenu(tester, 'General');
     await tester.pumpAndSettle();
 
     container.read(chatProvider.notifier).openStepUp();

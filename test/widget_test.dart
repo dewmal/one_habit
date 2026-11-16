@@ -13,13 +13,13 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(overrides: testAiOverrides(), child: const HabitAgentApp()),
     );
-    expect(find.text('Habit Agent'), findsOneWidget);
+    expect(find.text('One habit'), findsOneWidget);
 
     final container = ProviderScope.containerOf(
       tester.element(find.byType(HabitAgentApp)),
     );
     container.read(languageProvider.notifier).toggle();
     await tester.pump();
-    expect(find.text('Habit Agent'), findsOneWidget);
+    expect(find.text('One habit'), findsOneWidget);
   });
 }
