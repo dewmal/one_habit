@@ -31,7 +31,7 @@ These are not code. Each one blocks a specific day, so write them before that da
 ### Decisions the documents leave open
 
 - [ ] **Hard stop detection:** how "unwell" or "very low" is detected: a word list, an AI flag, or both. Decide **before Thu Nov 26** (UI guide, screen 10)
-- [ ] **Chat history storage:** the Day 1 plan lists four tables, but My data needs chat history. Add a fifth table or place it in an existing one. Decide **on Mon Nov 16** when the tables are created (UI guide, screen 14)
+- [x] **Chat history storage:** the Day 1 plan lists four tables, but My data needs chat history. Add a fifth table or place it in an existing one. Decide **on Mon Nov 16** when the tables are created (UI guide, screen 14)
 - [ ] **Where today's and tomorrow's tasks are stored** (inside the plan table or a table of their own). Decide **on Mon Nov 16**
 - [ ] **No-shame blocklist contents:** the actual blocked words and patterns (guilt, fake urgency, streak-loss threats), English and Sinhala. Needed **by Fri Nov 20**
 
@@ -73,7 +73,7 @@ These are not code. Each one blocks a specific day, so write them before that da
 - [x] Phone-side gateway client. The app contains no secrets
 - [x] Request builder that sends only a short summary and the last few messages of the open chat (Spec section 6)
 - [x] Chat page base: `ChatHeader` ("General", "Your coach · AI"), `AgentBubble`, `UserBubble`, `InputBar`
-- [ ] Save chat messages to the phone
+- [x] Save chat messages to the phone
 - [x] Plain "no connection, try again" message when the gateway cannot be reached
 
 **Done when:** chat works from the phone, nothing is stored on the gateway.
