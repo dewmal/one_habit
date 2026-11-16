@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/startup.dart';
+import '../chat/chat_controller.dart';
 import 'projects.dart';
 
 /// Where the user is in the app. Welcome first, then onboarding chat, then the tabs.
@@ -29,6 +30,7 @@ class AppController extends Notifier<AppState> {
   /// Welcome "Start" button. The habit and its General chat are saved first.
   Future<void> startOnboarding() async {
     await ref.read(projectsProvider.notifier).ensureHabit();
+    await ref.read(chatProvider.notifier).beginOnboarding();
     state = state.copyWith(phase: AppPhase.onboarding);
   }
 

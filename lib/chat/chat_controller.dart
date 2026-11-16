@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../ai/connection_status.dart' show gatewayUrl;
@@ -6,95 +8,17 @@ import '../ai/llm_client.dart';
 import '../app/app_state.dart';
 import '../app/day_state.dart';
 import '../app/dummy_data.dart';
+import '../app/projects.dart';
 import '../app/rules.dart';
+import '../data/app_database.dart';
+import '../data/database_provider.dart';
+import '../data/startup.dart';
 import '../i18n/language.dart';
 import '../plugins/fitness_plugin.dart';
+import 'chat_message.dart';
+import 'history.dart';
 
-/// One tappable answer under a message.
-class ChatReply {
-  const ChatReply({required this.value, required this.label});
-
-  final String value;
-  final Map<AppLanguage, String> label;
-}
-
-/// A fixed card shown inside a bubble. The AI only chooses the card and fills words.
-sealed class ChatCard {
-  const ChatCard();
-}
-
-class LevelCardData extends ChatCard {
-  const LevelCardData({
-    required this.level,
-    required this.steps,
-    required this.healthLock,
-  });
-
-  final String level;
-  final List<String> steps;
-  final bool healthLock;
-}
-
-/// The smaller step after missed days. [was] and [now] are step counts.
-class MissedDayCardData extends ChatCard {
-  const MissedDayCardData({
-    required this.was,
-    required this.now,
-    required this.step,
-  });
-
-  final int was;
-  final int now;
-  final String step;
-}
-
-/// The step-up offer. Nothing changes unless the user says yes.
-class StepUpCardData extends ChatCard {
-  const StepUpCardData({required this.now, required this.bigger});
-
-  final String now;
-  final String bigger;
-}
-
-/// Shown after "I feel unwell" or "very low": everything is paused.
-class HardStopCardData extends ChatCard {
-  const HardStopCardData();
-}
-
-class LogCardData extends ChatCard {
-  const LogCardData({required this.tasks, required this.initialResults});
-
-  final List<String> tasks;
-  final Map<int, TaskResult> initialResults;
-}
-
-/// One bubble. Text is kept for every language so the chat re-translates
-/// when the user switches language.
-class ChatMessage {
-  const ChatMessage({
-    required this.id,
-    required this.fromAgent,
-    required this.text,
-    this.questionLabel,
-    this.replies = const [],
-    this.card,
-  });
-
-  final int id;
-  final bool fromAgent;
-  final Map<AppLanguage, String> text;
-  final Map<AppLanguage, String>? questionLabel;
-  final List<ChatReply> replies;
-  final ChatCard? card;
-
-  ChatMessage withoutCard() => ChatMessage(
-    id: id,
-    fromAgent: fromAgent,
-    text: text,
-    questionLabel: questionLabel,
-    replies: const [],
-  );
-}
+export 'chat_message.dart';
 
 enum OnboardingStep { askGoal, questions, healthCheck, levelPlan }
 
@@ -154,64 +78,146 @@ class ChatState {
 }
 
 /// The General chat. In onboarding it asks the goal and up to 5 questions in total.
+/// Every message is saved to the database first, then shown.
 class ChatController extends Notifier<ChatState> {
-  int _seq = 0;
-
   /// The last queued user message. Each one waits for the one before it.
   Future<void> _turn = Future.value();
 
-  @override
-  ChatState build() => _initial();
+  /// Database writes run one after another, so ids and screen order match.
+  Future<void> _queue = Future.value();
 
-  /// Clears the chat history, used by My data and "Delete everything".
-  void reset() => state = _initial();
+  AppDatabase get _db => ref.read(databaseProvider);
+
+  int get _chatId => ref.read(projectsProvider).current.generalChat.id;
+
+  int get _habitId => ref.read(projectsProvider).current.id;
+
+  @override
+  ChatState build() {
+    final start = ref.watch(startupProvider);
+    if (start.habits.isEmpty || start.habits.first['level'] == null) {
+      // No finished habit: onboarding starts from the top.
+      return const ChatState(messages: []);
+    }
+    final habit = start.habits.first;
+    final safety = habit['safety_result'] as String?;
+    return ChatState(
+      messages: [for (final r in start.generalMessages) messageFromRow(r)],
+      step: OnboardingStep.levelPlan,
+      goal: habit['goal'] as String?,
+      level: habit['level'] as String?,
+      healthAnswers: safety == null ? const [] : [safety == 'gentle'],
+    );
+  }
+
+  Future<T> _enqueue<T>(Future<T> Function() job) {
+    final result = _queue.then((_) => job());
+    _queue = result.then((_) {}, onError: (_) {});
+    return result;
+  }
+
+  /// Starts onboarding from the top: the General chat is cleared and the
+  /// greeting is saved.
+  Future<void> beginOnboarding() async {
+    await _enqueue(() => _db.deleteChat(_chatId));
+    state = const ChatState(messages: []);
+    await _sayKey('chat.greeting');
+  }
+
+  /// Deletes the messages of the General chat. The goal, level and plan stay.
+  Future<void> clearMessages() async {
+    await _enqueue(() => _db.deleteChat(_chatId));
+    state = state.copyWith(messages: const []);
+  }
+
+  /// Clears the chat and everything learned in onboarding.
+  Future<void> reset() async {
+    await clearMessages();
+    state = const ChatState(messages: []);
+  }
 
   /// Deletes the habit answers: goal, placement, health check and level.
-  void clearHabit() => state = ChatState(messages: state.messages);
+  Future<void> clearHabit() async {
+    await _db.updateHabit(_habitId, {
+      'goal': null,
+      'level': null,
+      'safety_result': null,
+    });
+    state = ChatState(messages: state.messages);
+  }
 
   /// Deletes the steps the plan was built from.
   void clearSteps() => state = state.copyWith(steps: const []);
 
-  ChatState _initial() =>
-      ChatState(messages: [_agent(textOf('chat.greeting'))]);
-
-  ChatMessage _agent(
-    Map<AppLanguage, String> text, {
-    Map<AppLanguage, String>? questionLabel,
-    List<ChatReply> replies = const [],
+  /// Saves one message, then shows it. Returns the row id.
+  Future<int> _save(
+    String role, {
+    String text = '',
+    String? textKey,
     ChatCard? card,
-  }) => ChatMessage(
-    id: _seq++,
-    fromAgent: true,
-    text: filterOutgoing(text),
-    questionLabel: questionLabel,
-    replies: replies,
-    card: card,
-  );
+  }) => _enqueue(() async {
+    final kind = card != null ? 'card' : (textKey != null ? 'fixed' : 'text');
+    final cardData = card == null ? null : jsonEncode(card.toJson());
+    final id = await _db.addMessage(
+      _chatId,
+      role,
+      kind: kind,
+      text: text,
+      textKey: textKey,
+      cardType: card?.type,
+      cardData: cardData,
+    );
+    state = state.copyWith(
+      messages: [
+        ...state.messages,
+        messageFromRow({
+          'id': id,
+          'role': role,
+          'kind': kind,
+          'text': text,
+          'text_key': textKey,
+          'card_type': card?.type,
+          'card_data': cardData,
+          'card_answer': null,
+          'status': 'sent',
+        }),
+      ],
+    );
+    return id;
+  });
 
-  void _append(ChatMessage message) =>
-      state = state.copyWith(messages: [...state.messages, message]);
+  /// An approved phrase, saved by its key.
+  Future<void> _sayKey(String key) => _save('assistant', textKey: key);
 
-  void _say(Map<AppLanguage, String> text) => _append(_agent(text));
+  /// AI text. The rules engine has the final say: blocked wording is never
+  /// saved, a calm fixed phrase is saved instead.
+  Future<void> _sayAi(String text) => isBlocked(text)
+      ? _sayKey('chat.safe_fallback')
+      : _save('assistant', text: text);
+
+  /// Saves the user's tap or answer on a card and hides what was answered.
+  Future<void> _answer(int messageId, String answer) => _enqueue(() async {
+    await _db.answerCard(messageId, answer);
+    state = state.copyWith(
+      messages: [
+        for (final m in state.messages)
+          m.id == messageId ? m.answered(answer) : m,
+      ],
+    );
+  });
+
+  /// The newest message that still waits for a tap on its quick replies.
+  ChatMessage? get _openReplies {
+    for (final m in state.messages.reversed) {
+      if (m.fromAgent && m.replies.isNotEmpty) return m;
+    }
+    return null;
+  }
 
   int get _placementCount => fitnessPlugin.placementQuestions.length;
 
-  void _askQuestion(int index) {
-    final question = fitnessPlugin.placementQuestions[index];
-    _append(
-      _agent(
-        question.text,
-        questionLabel: textOf('chat.question_label', {
-          'n': '${index + 2}',
-          'total': '${_placementCount + 1}',
-        }),
-        replies: [
-          for (final option in question.options)
-            ChatReply(value: option.id, label: option.label),
-        ],
-      ),
-    );
-  }
+  Future<void> _askQuestion(int index) =>
+      _save('assistant', card: QuestionCardData(index: index));
 
   /// Shows the level card with the steps for the current level. The AI writes
   /// the tiny steps through the gateway. If that fails, the fixed steps for the
@@ -221,24 +227,15 @@ class ChatController extends Notifier<ChatState> {
     final steps = state.steps.isEmpty ? await _writeSteps(level) : state.steps;
     state = state.copyWith(level: level, steps: steps);
     // The newest level card replaces the older one, so only one plan shows.
-    state = state.copyWith(
-      messages: [
-        for (final m in state.messages)
-          m.card is LevelCardData ? m.withoutCard() : m,
-      ],
-    );
-    _append(
-      _agent(
-        textOf('level.intro'),
-        replies: [
-          ChatReply(value: 'looks_good', label: textOf('level.looks_good')),
-          ChatReply(value: 'smaller', label: textOf('level.smaller')),
-        ],
-        card: LevelCardData(
-          level: level,
-          steps: steps,
-          healthLock: state.healthLock,
-        ),
+    for (final m in state.messages.toList()) {
+      if (m.card is LevelCardData) await _answer(m.id, 'replaced');
+    }
+    await _save(
+      'assistant',
+      card: LevelCardData(
+        level: level,
+        steps: steps,
+        healthLock: state.healthLock,
       ),
     );
   }
@@ -247,170 +244,133 @@ class ChatController extends Notifier<ChatState> {
       placeLevel(fitnessPlugin, state.answers, healthLock: state.healthLock);
 
   /// "Log how it went": the log card opens in chat with today's results so far.
-  void openDailyLog(List<String> tasks, Map<int, TaskResult> results) {
-    _append(
-      _agent(
-        textOf('log.question'),
+  Future<void> openDailyLog(List<String> tasks, Map<int, TaskResult> results) =>
+      _save(
+        'assistant',
         card: LogCardData(tasks: tasks, initialResults: results),
-      ),
-    );
-  }
+      );
 
   /// Saves the log card. The reply is the fixed phrase, never AI text.
-  void saveDailyLog(
+  Future<void> saveDailyLog(
     int messageId,
     Map<int, TaskResult> results,
     Feeling feeling,
-  ) {
+  ) async {
     ref.read(dayProvider.notifier).saveLog(results, feeling);
-    state = state.copyWith(
-      messages: [
-        for (final m in state.messages) m.id == messageId ? m.withoutCard() : m,
-      ],
-    );
-    _say(textOf('log.saved_reply'));
+    await _answer(messageId, 'saved');
+    await _sayKey('log.saved_reply');
   }
 
-  void _hardStop() {
+  Future<void> _hardStop() async {
     ref.read(dayProvider.notifier).setPaused(true);
-    _append(
-      _agent(
-        textOf('hardstop.care'),
-        replies: [
-          ChatReply(value: 'keep_paused', label: textOf('hardstop.keep')),
-          ChatReply(value: 'resume', label: textOf('hardstop.resume')),
-        ],
-        card: const HardStopCardData(),
-      ),
-    );
+    await _save('assistant', card: const HardStopCardData());
   }
 
-  void _hardStopReply(ChatReply reply) {
+  Future<void> _hardStopReply(ChatReply reply) async {
     if (reply.value == 'resume') {
       ref.read(dayProvider.notifier).setPaused(false);
-      _say(textOf('hardstop.resume_ack'));
+      await _sayKey('hardstop.resume_ack');
     } else {
-      _say(textOf('hardstop.keep_ack'));
+      await _sayKey('hardstop.keep_ack');
     }
   }
 
   /// The offer after a steady run. Shown only; the plan changes on a yes.
-  void openStepUp() {
+  Future<void> openStepUp() async {
     if (ref.read(dayProvider).paused) return;
-    _append(
-      _agent(
-        textOf('stepup.reason'),
-        card: const StepUpCardData(now: dummyNowStep, bigger: dummyBiggerStep),
-      ),
+    await _save(
+      'assistant',
+      card: const StepUpCardData(now: dummyNowStep, bigger: dummyBiggerStep),
     );
   }
 
   /// Yes applies the bigger step from tomorrow. Not yet changes nothing.
-  void answerStepUp(int messageId, {required bool yes}) {
+  Future<void> answerStepUp(int messageId, {required bool yes}) async {
     final allowed = canStepUp(userSaidYes: yes);
-    state = state.copyWith(
-      messages: [
-        for (final m in state.messages) m.id == messageId ? m.withoutCard() : m,
-      ],
-    );
+    await _answer(messageId, yes ? 'yes' : 'not_yet');
     if (allowed) {
       state = state.copyWith(steps: [dummyBiggerStep]);
-      _say(textOf('stepup.yes_ack'));
+      await _sayKey('stepup.yes_ack');
     } else {
-      _say(textOf('stepup.not_yet_ack'));
+      await _sayKey('stepup.not_yet_ack');
     }
   }
 
   /// After missed days: the fixed phrase, then one smaller step.
   /// Missed days only ever make the plan smaller. They never reset it.
-  void openMissedDays() {
+  Future<void> openMissedDays() async {
     if (ref.read(dayProvider).paused) return;
-    _say(textOf('missed.phrase'));
-    _showSmallerStep(
+    await _sayKey('missed.phrase');
+    await _showSmallerStep(
       from: ref.read(dayProvider).tasks.length,
       step: dummySmallestStep,
     );
   }
 
-  void _showSmallerStep({required int from, required String step}) {
+  Future<void> _showSmallerStep({
+    required int from,
+    required String step,
+  }) async {
     state = state.copyWith(steps: [step]);
-    state = state.copyWith(
-      messages: [
-        for (final m in state.messages)
-          m.card is MissedDayCardData ? m.withoutCard() : m,
-      ],
-    );
-    _append(
-      _agent(
-        textOf('missed.made_smaller'),
-        replies: [
-          ChatReply(value: 'okay', label: textOf('missed.okay')),
-          ChatReply(
-            value: 'still_too_much',
-            label: textOf('missed.still_much'),
-          ),
-        ],
-        card: MissedDayCardData(was: from, now: 1, step: step),
-      ),
+    for (final m in state.messages.toList()) {
+      if (m.card is MissedDayCardData) await _answer(m.id, 'replaced');
+    }
+    await _save(
+      'assistant',
+      card: MissedDayCardData(was: from, now: 1, step: step),
     );
   }
 
-  void _missedReply(ChatReply? reply) {
+  Future<void> _missedReply(ChatReply? reply) async {
     switch (reply?.value) {
       case 'okay':
-        _say(textOf('missed.okay_ack'));
+        await _sayKey('missed.okay_ack');
       case 'still_too_much':
-        _showSmallerStep(from: 1, step: dummyTinierStep);
+        await _showSmallerStep(from: 1, step: dummyTinierStep);
       default:
-        _say(textOf('chat.noted'));
+        await _sayKey('chat.noted');
     }
   }
 
   /// Asks the AI for a coach reply. The rules engine still has the final say.
   Future<void> _coachReply() async {
-    // Send only the last few messages, as the privacy rule says. The history
-    // must start with a user message, so leading coach lines are dropped.
-    final recent = state.messages.reversed.take(10).toList().reversed;
-    final history = [
-      for (final m in recent)
-        ChatTurn(
-          role: m.fromAgent ? 'assistant' : 'user',
-          content: m.text[AppLanguage.en] ?? '',
-        ),
-    ];
-    while (history.isNotEmpty && history.first.role != 'user') {
-      history.removeAt(0);
-    }
+    // Only the last 10 saved text messages go to the gateway (privacy rule).
+    final history = buildHistory(await _db.recentTextMessages(_chatId));
 
     AgentSuggestion? suggestion;
-    Map<AppLanguage, String>? failure;
+    String? failure;
     try {
       suggestion = await ref
           .read(llmProvider)
           .chatReply(
             language: _languageName(),
-            summary: 'Goal: ${state.goal ?? ''}. Level: ${state.level ?? ''}.',
+            summary: _context(),
             history: history,
           );
     } on AiException catch (e) {
-      failure = _errorText(e.code);
+      failure = _errorKey(e.code);
     } catch (_) {
-      failure = textOf('chat.no_connection');
+      failure = 'chat.no_connection';
     }
 
     // A hard stop that came in while waiting wins: nothing more is shown.
     if (ref.read(dayProvider).paused) return;
 
     if (suggestion == null) {
-      _say(failure!);
+      await _sayKey(failure!);
       return;
     }
-    // _say goes through filterOutgoing, so blocked words never show.
-    _say({AppLanguage.en: suggestion.text, AppLanguage.si: suggestion.text});
+    await _sayAi(suggestion.text);
 
     // The AI may only suggest. The step-up card asks the user first.
-    if (suggestion.wantsBigger) openStepUp();
+    if (suggestion.wantsBigger) await openStepUp();
   }
+
+  /// The short context line sent with every request. Never health answers,
+  /// the name or the daily log.
+  String _context() =>
+      'Goal: ${state.goal ?? ''}. Level: ${state.level ?? ''}.'
+      '${state.healthLock ? ' Keep very gentle.' : ''}';
 
   /// Asks the AI for today's and tomorrow's tiny steps. Blocked wording is
   /// dropped. Any failure falls back to the fixed steps for the level.
@@ -429,9 +389,9 @@ class ChatController extends Notifier<ChatState> {
       ];
       if (safe.isNotEmpty) return safe;
     } on AiException catch (e) {
-      _say(_errorText(e.code));
+      await _sayKey(_errorKey(e.code));
     } catch (_) {
-      _say(textOf('chat.no_connection'));
+      await _sayKey('chat.no_connection');
     }
     return dummyStepsFor(level);
   }
@@ -439,13 +399,13 @@ class ChatController extends Notifier<ChatState> {
   String _languageName() =>
       ref.read(languageProvider) == AppLanguage.si ? 'Sinhala' : 'English';
 
-  /// A calm message for each gateway code. Raw codes and provider text never
+  /// A calm phrase for each gateway code. Raw codes and provider text never
   /// reach the screen.
-  Map<AppLanguage, String> _errorText(String code) => switch (code) {
-    'no_connection' => textOf('chat.no_connection'),
-    'rate_limited' => textOf('chat.rate_limited'),
-    'too_large' => textOf('chat.too_large'),
-    _ => textOf('chat.try_again'),
+  String _errorKey(String code) => switch (code) {
+    'no_connection' => 'chat.no_connection',
+    'rate_limited' => 'chat.rate_limited',
+    'too_large' => 'chat.too_large',
+    _ => 'chat.try_again',
   };
 
   /// The user typed text, or tapped a quick reply (pass [reply]).
@@ -453,13 +413,9 @@ class ChatController extends Notifier<ChatState> {
     final text = raw.trim();
     if (text.isEmpty && reply == null) return;
 
-    _append(
-      ChatMessage(
-        id: _seq++,
-        fromAgent: false,
-        text: reply?.label ?? {AppLanguage.en: text, AppLanguage.si: text},
-      ),
-    );
+    // Save first, then show.
+    final label = reply == null ? text : (reply.label[AppLanguage.en] ?? '');
+    final saved = _save('user', text: label);
 
     // The hard stop comes first and applies to every reply after it.
     if (reply == null && isHardStop(text)) {
@@ -468,13 +424,25 @@ class ChatController extends Notifier<ChatState> {
     }
 
     if (reply?.value == 'keep_paused' || reply?.value == 'resume') {
+      final open = _openReplies;
+      if (open != null) _answer(open.id, reply!.value);
       _hardStopReply(reply!);
       return;
     }
 
+    // The answer is saved on the card that asked. A typed line only answers
+    // a placement question.
+    final open = _openReplies;
+    if (open != null && (reply != null || open.card is QuestionCardData)) {
+      _answer(open.id, reply?.value ?? text);
+    }
+
     // Messages are answered one at a time, in order. The next screen is built
     // only after the gateway has answered.
-    _turn = _turn.then((_) => _respond(text, reply));
+    _turn = _turn.then((_) async {
+      await saved;
+      await _respond(text, reply);
+    });
   }
 
   /// One user message: ask the gateway first, then build the next screen.
@@ -484,7 +452,7 @@ class ChatController extends Notifier<ChatState> {
 
     if (ref.read(appProvider).phase != AppPhase.onboarding) {
       if (reply?.value == 'okay' || reply?.value == 'still_too_much') {
-        _missedReply(reply);
+        await _missedReply(reply);
       }
       return;
     }
@@ -492,55 +460,61 @@ class ChatController extends Notifier<ChatState> {
     switch (state.step) {
       case OnboardingStep.askGoal:
         state = state.copyWith(goal: text, step: OnboardingStep.questions);
-        _say(textOf('chat.good_goal'));
-        _askQuestion(0);
+        await _db.updateHabit(_habitId, {'goal': text});
+        await _sayKey('chat.good_goal');
+        await _askQuestion(0);
       case OnboardingStep.questions:
         final question = fitnessPlugin.placementQuestions[state.questionIndex];
         final answers = {...state.answers, question.id: reply?.value ?? text};
         final next = state.questionIndex + 1;
         if (next < _placementCount) {
           state = state.copyWith(answers: answers, questionIndex: next);
-          _askQuestion(next);
+          await _askQuestion(next);
         } else {
           state = state.copyWith(
             answers: answers,
             step: OnboardingStep.healthCheck,
           );
-          _say(textOf('chat.health_next'));
+          await _sayKey('chat.health_next');
         }
       case OnboardingStep.healthCheck:
         break;
       case OnboardingStep.levelPlan:
-        _levelReply(reply);
+        await _levelReply(reply);
     }
   }
 
-  void _levelReply(ChatReply? reply) {
+  Future<void> _levelReply(ChatReply? reply) async {
     switch (reply?.value) {
       case 'looks_good':
-        // Starts today with the agreed steps, then moves to Today.
-        // Saving the plan to the database comes later.
+        // Starts today with the agreed steps, then moves to Today. The level
+        // is saved on the habit: that is what marks onboarding as finished.
+        await _db.updateHabit(_habitId, {'level': state.level});
         ref.read(dayProvider.notifier).startDay(state.steps);
         ref.read(appProvider.notifier).finishOnboarding();
       case 'smaller':
         // Smaller steps need no extra check: keep only the first step.
         final smaller = state.steps.take(1).toList();
         state = state.copyWith(steps: smaller);
-        _say(textOf('level.smaller_ack'));
-        _showLevelCard();
+        await _sayKey('level.smaller_ack');
+        await _showLevelCard();
       default:
-        _say(textOf('chat.noted'));
+        await _sayKey('chat.noted');
     }
   }
 
   /// Called when the health check screen returns its answers (true = Yes).
-  void finishHealthCheck(List<bool> answers) {
+  Future<void> finishHealthCheck(List<bool> answers) async {
     if (state.step != OnboardingStep.healthCheck) return;
     state = state.copyWith(
       healthAnswers: answers,
       step: OnboardingStep.levelPlan,
     );
-    _showLevelCard();
+    // Only the result is saved, never the answers.
+    await _db.updateHabit(_habitId, {
+      'safety_result': state.healthLock ? 'gentle' : 'normal',
+    });
+    await _showLevelCard();
   }
 }
 

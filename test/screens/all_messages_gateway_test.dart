@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:one_preccent/ai/llm_client.dart';
-import 'package:one_preccent/chat/chat_controller.dart';
 import 'package:one_preccent/main.dart';
 
 import '../support/test_llm_client.dart';

@@ -272,7 +272,7 @@ class _SectionRow extends ConsumerWidget {
       case DataSection.log:
         ref.read(dayProvider.notifier).clearLog();
       case DataSection.chat:
-        ref.read(chatProvider.notifier).reset();
+        ref.read(chatProvider.notifier).clearMessages();
     }
   }
 }
