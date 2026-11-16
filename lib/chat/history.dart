@@ -22,3 +22,27 @@ List<ChatTurn> buildHistory(
   }
   return turns;
 }
+
+/// Asks for a coach reply with the saved [rows] of the chat. If the gateway
+/// says `too_large`, it asks once more with only the last 5 messages.
+Future<AgentSuggestion> askCoach(
+  LlmClient llm, {
+  required String language,
+  required String summary,
+  required List<Map<String, Object?>> rows,
+}) async {
+  try {
+    return await llm.chatReply(
+      language: language,
+      summary: summary,
+      history: buildHistory(rows),
+    );
+  } on AiException catch (e) {
+    if (e.code != 'too_large' || rows.length <= 5) rethrow;
+    return llm.chatReply(
+      language: language,
+      summary: summary,
+      history: buildHistory(rows.sublist(rows.length - 5)),
+    );
+  }
+}

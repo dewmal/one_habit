@@ -120,7 +120,13 @@ class ChatPage extends ConsumerWidget {
     ChatController controller,
   ) {
     final text = resolve(message.text, language);
-    if (!message.fromAgent) return UserBubble(text: text);
+    if (!message.fromAgent) {
+      return UserBubble(
+        text: text,
+        retryLabel: message.failed ? tr('chat.retry', language) : null,
+        onRetry: message.failed ? () => controller.retry(message.id) : null,
+      );
+    }
     final card = message.card;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

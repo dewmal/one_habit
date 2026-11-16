@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../ai/llm_client.dart';
 import '../chat/chat_controller.dart';
 import '../chat/history.dart';
 import '../data/app_database.dart';
@@ -205,7 +206,7 @@ class TopicChats extends Notifier<Map<int, List<ChatMessage>>> {
   }
 
   /// Saves one message, then shows it.
-  Future<void> _save(
+  Future<int> _save(
     int chatId,
     String role, {
     String text = '',
@@ -238,28 +239,48 @@ class TopicChats extends Notifier<Map<int, List<ChatMessage>>> {
       ...state,
       chatId: [...(state[chatId] ?? const []), message],
     };
+    return id;
   }
 
   Future<void> send(int chatId, String topic, String raw) async {
     final text = raw.trim();
     if (text.isEmpty) return;
-    await _save(chatId, 'user', text: text);
+    final id = await _save(chatId, 'user', text: text);
+    await _ask(chatId, topic, id);
+  }
+
+  /// "Try again" on a failed message: it is sent again, not copied.
+  Future<void> retry(int chatId, String topic, int messageId) async {
+    await _mark(chatId, messageId, failed: false);
+    await _ask(chatId, topic, messageId);
+  }
+
+  Future<void> _mark(int chatId, int messageId, {required bool failed}) async {
+    await _db.setStatus(messageId, failed ? 'failed' : 'sent');
+    state = {
+      ...state,
+      chatId: [
+        for (final m in state[chatId] ?? const <ChatMessage>[])
+          m.id == messageId ? m.withFailed(failed) : m,
+      ],
+    };
+  }
+
+  Future<void> _ask(int chatId, String topic, int userId) async {
     final chat = ref.read(chatProvider);
     final language = ref.read(languageProvider);
-    // The same last-10 rule as the General chat, so a long topic chat never
-    // goes over the gateway limit.
-    final history = buildHistory(await _db.recentTextMessages(chatId));
     try {
-      final reply = await ref
-          .read(llmProvider)
-          .chatReply(
-            language: language == AppLanguage.si ? 'Sinhala' : 'English',
-            summary:
-                'Goal: ${chat.goal ?? ''}. Level: ${chat.level ?? ''}. '
-                '${chat.healthLock ? 'Keep very gentle. ' : ''}'
-                'This is the "$topic" topic chat.',
-            history: history,
-          );
+      // The same last-10 rule as the General chat, so a long topic chat never
+      // goes over the gateway limit.
+      final reply = await askCoach(
+        ref.read(llmProvider),
+        language: language == AppLanguage.si ? 'Sinhala' : 'English',
+        summary:
+            'Goal: ${chat.goal ?? ''}. Level: ${chat.level ?? ''}. '
+            '${chat.healthLock ? 'Keep very gentle. ' : ''}'
+            'This is the "$topic" topic chat.',
+        rows: await _db.recentTextMessages(chatId),
+      );
       if (isBlocked(reply.text)) {
         await _save(chatId, 'assistant', textKey: 'chat.safe_fallback');
         return;
@@ -271,8 +292,11 @@ class TopicChats extends Notifier<Map<int, List<ChatMessage>>> {
         });
         await _save(chatId, 'assistant', card: const InfoCardData());
       }
-    } catch (_) {
-      await _save(chatId, 'assistant', textKey: 'chat.no_connection');
+    } catch (e) {
+      await _mark(chatId, userId, failed: true);
+      if (e is AiException && e.code == 'rate_limited') {
+        await _save(chatId, 'assistant', textKey: 'chat.rate_limited');
+      }
     }
   }
 

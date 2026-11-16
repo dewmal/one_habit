@@ -58,7 +58,13 @@ class _TopicChatPageState extends ConsumerState<TopicChatPage> {
             ),
           )
         else if (!m.fromAgent)
-          UserBubble(text: resolve(m.text, language))
+          UserBubble(
+            text: resolve(m.text, language),
+            retryLabel: m.failed ? tr('chat.retry', language) : null,
+            onRetry: m.failed
+                ? () => controller.retry(chat.id, chat.title, m.id)
+                : null,
+          )
         else
           AgentBubble(
             child: Text(resolve(m.text, language), style: AppText.body),

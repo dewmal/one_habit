@@ -57,7 +57,9 @@ void main() {
       }
       await tester.pumpAndSettle();
 
-      expect(find.text('No connection. Please try again.'), findsOneWidget);
+      // No error bubble: the user's messages show "Try again" instead.
+      expect(find.text('No connection. Please try again.'), findsNothing);
+      expect(find.text('Try again'), findsWidgets);
       expect(find.text('Go to the gym'), findsOneWidget);
     },
   );

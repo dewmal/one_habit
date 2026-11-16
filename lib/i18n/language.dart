@@ -110,6 +110,10 @@ const Map<String, Map<AppLanguage, String>> _strings = {
     AppLanguage.en: 'That was too much at once. Try a shorter message.',
     AppLanguage.si: 'එකවර වැඩියි. කෙටි පණිවිඩයක් උත්සාහ කරන්න.',
   },
+  'chat.retry': {
+    AppLanguage.en: 'Try again',
+    AppLanguage.si: 'නැවත උත්සාහ කරන්න',
+  },
   'chat.try_again': {
     AppLanguage.en: 'Let us try again in a moment.',
     AppLanguage.si: 'මොහොතකින් නැවත උත්සාහ කරමු.',

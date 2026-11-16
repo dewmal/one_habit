@@ -349,38 +349,56 @@ class ChatController extends Notifier<ChatState> {
     }
   }
 
-  /// Asks the AI for a coach reply. The rules engine still has the final say.
-  Future<void> _coachReply() async {
-    // Only the last 10 saved text messages go to the gateway (privacy rule).
-    final history = buildHistory(await _db.recentTextMessages(_chatId));
-
+  /// Asks the AI for a coach reply to the user's message [userId]. The rules
+  /// engine still has the final say. If the call fails, the user's message is
+  /// marked failed and shows "Try again". No error bubble is saved.
+  Future<void> _coachReply(int userId) async {
     AgentSuggestion? suggestion;
     String? failure;
     try {
-      suggestion = await ref
-          .read(llmProvider)
-          .chatReply(
-            language: _languageName(),
-            summary: _context(),
-            history: history,
-          );
+      suggestion = await askCoach(
+        ref.read(llmProvider),
+        language: _languageName(),
+        summary: _context(),
+        // Only the last 10 saved text messages go to the gateway.
+        rows: await _db.recentTextMessages(_chatId),
+      );
     } on AiException catch (e) {
-      failure = _errorKey(e.code);
+      failure = e.code;
     } catch (_) {
-      failure = 'chat.no_connection';
+      failure = 'no_connection';
     }
 
     // A hard stop that came in while waiting wins: nothing more is shown.
     if (ref.read(dayProvider).paused) return;
 
     if (suggestion == null) {
-      await _sayKey(failure!);
+      await _markFailed(userId, true);
+      // Do not retry in a loop: a rate limit gets the fixed short-break phrase.
+      if (failure == 'rate_limited') await _sayKey('chat.rate_limited');
       return;
     }
     await _sayAi(suggestion.text);
 
     // The AI may only suggest. The step-up card asks the user first.
     if (suggestion.wantsBigger) await openStepUp();
+  }
+
+  Future<void> _markFailed(int messageId, bool failed) => _enqueue(() async {
+    await _db.setStatus(messageId, failed ? 'failed' : 'sent');
+    state = state.copyWith(
+      messages: [
+        for (final m in state.messages)
+          m.id == messageId ? m.withFailed(failed) : m,
+      ],
+    );
+  });
+
+  /// "Try again" on a failed message: the same message is sent again. No
+  /// second copy is made.
+  Future<void> retry(int messageId) async {
+    await _markFailed(messageId, false);
+    _turn = _turn.then((_) => _coachReply(messageId));
   }
 
   /// The short context line sent with every request. Never health answers,
@@ -405,25 +423,14 @@ class ChatController extends Notifier<ChatState> {
           if (!isBlocked(t)) t,
       ];
       if (safe.isNotEmpty) return safe;
-    } on AiException catch (e) {
-      await _sayKey(_errorKey(e.code));
     } catch (_) {
-      await _sayKey('chat.no_connection');
+      // The plan never waits on the network: the fixed steps are used.
     }
     return fitnessPlugin.fallbackStepsFor(level);
   }
 
   String _languageName() =>
       ref.read(languageProvider) == AppLanguage.si ? 'Sinhala' : 'English';
-
-  /// A calm phrase for each gateway code. Raw codes and provider text never
-  /// reach the screen.
-  String _errorKey(String code) => switch (code) {
-    'no_connection' => 'chat.no_connection',
-    'rate_limited' => 'chat.rate_limited',
-    'too_large' => 'chat.too_large',
-    _ => 'chat.try_again',
-  };
 
   /// The user typed text, or tapped a quick reply (pass [reply]).
   void send(String raw, {ChatReply? reply}) {
@@ -433,6 +440,7 @@ class ChatController extends Notifier<ChatState> {
     // Save first, then show.
     final label = reply == null ? text : (reply.label[AppLanguage.en] ?? '');
     final saved = _save('user', text: label);
+    // The id is known once the message is saved; _respond needs it.
 
     // The hard stop comes first and applies to every reply after it.
     if (reply == null && isHardStop(text)) {
@@ -457,14 +465,13 @@ class ChatController extends Notifier<ChatState> {
     // Messages are answered one at a time, in order. The next screen is built
     // only after the gateway has answered.
     _turn = _turn.then((_) async {
-      await saved;
-      await _respond(text, reply);
+      await _respond(await saved, text, reply);
     });
   }
 
   /// One user message: ask the gateway first, then build the next screen.
-  Future<void> _respond(String text, ChatReply? reply) async {
-    await _coachReply();
+  Future<void> _respond(int userId, String text, ChatReply? reply) async {
+    await _coachReply(userId);
     if (ref.read(dayProvider).paused) return;
 
     if (ref.read(appProvider).phase != AppPhase.onboarding) {
