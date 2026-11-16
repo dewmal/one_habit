@@ -4,25 +4,45 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:one_preccent/app/app_state.dart';
 import 'package:one_preccent/app/day_state.dart';
-import 'package:one_preccent/app/dummy_data.dart';
 import 'package:one_preccent/app/projects.dart';
 import 'package:one_preccent/main.dart';
 
+import '../support/memory_database.dart';
 import '../support/menu.dart';
 import '../support/test_llm_client.dart';
 
 void main() {
-  Future<ProviderContainer> pumpApp(WidgetTester tester) async {
+  /// The seeded habit plus these habits, and an Exercise topic chat.
+  MemoryAppDatabase database(List<String> more) {
+    final db = seededDatabase();
+    db.createChat(1, 'topic', 'Exercise');
+    for (final name in more) {
+      db
+          .createHabit(pluginId: 'fitness', name: name)
+          .then((id) => db.createChat(id, 'general', 'General'));
+    }
+    return db;
+  }
+
+  Future<ProviderContainer> pumpApp(
+    WidgetTester tester, {
+    List<String> more = const [],
+  }) async {
     tester.view.physicalSize = const Size(390 * 3, 844 * 3);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
-      ProviderScope(overrides: testAiOverrides(), child: const HabitAgentApp()),
+      ProviderScope(
+        overrides: testAiOverrides(database: database(more)),
+        child: const HabitAgentApp(),
+      ),
     );
     final container = ProviderScope.containerOf(
       tester.element(find.byType(HabitAgentApp)),
     );
-    container.read(dayProvider.notifier).startDay(dummyStepsFor('beginner'));
+    container.read(dayProvider.notifier).startDay([
+      'Pack your gym bag tonight',
+    ]);
     container.read(appProvider.notifier).finishOnboarding();
     await tester.pumpAndSettle();
     return container;
@@ -31,7 +51,10 @@ void main() {
   testWidgets('menu lists habits, chats and views; more habits expands', (
     tester,
   ) async {
-    await pumpApp(tester);
+    await pumpApp(
+      tester,
+      more: ['Read more', 'Drink water', 'Sleep earlier', 'Study daily'],
+    );
     await openMenu(tester);
 
     expect(find.text('One habit'), findsOneWidget);
@@ -57,9 +80,9 @@ void main() {
   testWidgets('tapping another habit makes it the current project', (
     tester,
   ) async {
-    final container = await pumpApp(tester);
+    final container = await pumpApp(tester, more: ['Read more']);
     await chooseInMenu(tester, 'Read more');
-    expect(container.read(projectsProvider).currentId, 'read');
+    expect(container.read(projectsProvider).currentId, 2);
     expect(find.text('Read more · AI'), findsOneWidget);
   });
 

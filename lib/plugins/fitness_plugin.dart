@@ -7,6 +7,7 @@ import 'habit_plugin.dart';
 const fitnessPlugin = HabitPlugin(
   id: 'fitness',
   name: {AppLanguage.en: 'Fitness', AppLanguage.si: 'Fitness'},
+  projectName: {AppLanguage.en: 'Improve my fitness'},
   icon: 'dumbbell',
   colorValue: 0xFFF2646C,
   description: {

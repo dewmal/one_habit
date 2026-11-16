@@ -40,22 +40,29 @@ void main() {
     expect(rows.last['card_answer'], 'looks_good');
   });
 
-  test('recentTextMessages skips cards, fixed and failed, keeps the last 10',
-      () async {
-    final db = await open();
-    final chat = await db.createChat(1, 'general', 'General');
-    for (var i = 0; i < 14; i++) {
-      await db.addMessage(chat, i.isEven ? 'user' : 'assistant', text: '$i');
-    }
-    await db.addMessage(chat, 'assistant', kind: 'fixed', textKey: 'chat.noted');
-    final failed = await db.addMessage(chat, 'user', text: 'lost');
-    await db.setStatus(failed, 'failed');
+  test(
+    'recentTextMessages skips cards, fixed and failed, keeps the last 10',
+    () async {
+      final db = await open();
+      final chat = await db.createChat(1, 'general', 'General');
+      for (var i = 0; i < 14; i++) {
+        await db.addMessage(chat, i.isEven ? 'user' : 'assistant', text: '$i');
+      }
+      await db.addMessage(
+        chat,
+        'assistant',
+        kind: 'fixed',
+        textKey: 'chat.noted',
+      );
+      final failed = await db.addMessage(chat, 'user', text: 'lost');
+      await db.setStatus(failed, 'failed');
 
-    final recent = await db.recentTextMessages(chat);
-    expect(recent.length, 10);
-    expect(recent.first['text'], '4');
-    expect(recent.last['text'], '13');
-  });
+      final recent = await db.recentTextMessages(chat);
+      expect(recent.length, 10);
+      expect(recent.first['text'], '4');
+      expect(recent.last['text'], '13');
+    },
+  );
 
   test('deleting a topic chat removes it, General keeps its row', () async {
     final db = await open();

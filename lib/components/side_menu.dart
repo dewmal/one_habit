@@ -190,7 +190,7 @@ class _OpenHabit extends ConsumerWidget {
   });
 
   final Project project;
-  final String currentChatId;
+  final int currentChatId;
   final AppTab tab;
   final AppLanguage language;
 

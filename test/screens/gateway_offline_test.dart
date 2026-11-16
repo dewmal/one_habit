@@ -6,6 +6,8 @@ import 'package:one_preccent/ai/llm_client.dart';
 import 'package:one_preccent/chat/chat_controller.dart';
 import 'package:one_preccent/main.dart';
 
+import '../support/test_llm_client.dart';
+
 /// Every call fails the way a dropped connection does.
 class _OfflineClient implements LlmClient {
   @override
@@ -33,7 +35,7 @@ void main() {
 
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [llmProvider.overrideWithValue(_OfflineClient())],
+          overrides: testAiOverrides(client: _OfflineClient()),
           child: const HabitAgentApp(),
         ),
       );

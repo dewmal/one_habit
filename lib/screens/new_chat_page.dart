@@ -29,10 +29,9 @@ class _NewChatPageState extends ConsumerState<NewChatPage> {
     super.dispose();
   }
 
-  void _start(String name) {
-    if (ref.read(projectsProvider.notifier).startChat(name)) {
-      Navigator.of(context).pop();
-    }
+  Future<void> _start(String name) async {
+    final started = await ref.read(projectsProvider.notifier).startChat(name);
+    if (started && mounted) Navigator.of(context).pop();
   }
 
   @override

@@ -8,6 +8,8 @@ import 'package:one_preccent/ai/llm_client.dart';
 import 'package:one_preccent/chat/chat_controller.dart';
 import 'package:one_preccent/main.dart';
 
+import '../support/test_llm_client.dart';
+
 /// Records the history of every coach call the chat makes.
 class _RecordingClient implements LlmClient {
   final List<List<ChatTurn>> calls = [];
@@ -40,7 +42,7 @@ void main() {
     final client = _RecordingClient();
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [llmProvider.overrideWithValue(client)],
+        overrides: testAiOverrides(client: client),
         child: const HabitAgentApp(),
       ),
     );
@@ -75,7 +77,7 @@ void main() {
     final client = _GatedClient(gate.future);
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [llmProvider.overrideWithValue(client)],
+        overrides: testAiOverrides(client: client),
         child: const HabitAgentApp(),
       ),
     );

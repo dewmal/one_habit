@@ -2,25 +2,29 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../ai/llm_client.dart';
 import '../chat/chat_controller.dart';
+import '../data/app_database.dart';
+import '../data/database_provider.dart';
+import '../data/startup.dart';
 import '../i18n/language.dart';
+import '../plugins/fitness_plugin.dart';
 import 'rules.dart';
 import 'tabs.dart';
 
 /// One chat inside a habit. The General chat is pinned and the only one
-/// that can change the plan.
+/// that can change the plan. [id] is the row id of the chat table.
 class ChatInfo {
   const ChatInfo({required this.id, required this.title, this.general = false});
 
-  final String id;
+  final int id;
   final String title;
   final bool general;
 }
 
-/// One habit (project). The first layout had only one.
+/// One habit (project). [id] is the row id of the habit table.
 class Project {
   const Project({required this.id, required this.name, required this.chats});
 
-  final String id;
+  final int id;
   final String name;
   final List<ChatInfo> chats;
 
@@ -35,8 +39,10 @@ class ProjectsState {
   });
 
   final List<Project> projects;
-  final String currentId;
-  final String currentChatId;
+  final int currentId;
+  final int currentChatId;
+
+  bool get hasProject => projects.isNotEmpty;
 
   Project get current => projects.firstWhere((p) => p.id == currentId);
 
@@ -49,36 +55,68 @@ class ProjectsState {
 /// Topics offered on the New chat screen (plugin topics for now).
 const newChatTopics = ['Exercise', 'Diet', 'Health issues'];
 
-Project _project(String id, String name, {List<String> topics = const []}) =>
+/// Builds the projects from the habit and chat rows read at start.
+List<Project> projectsFromRows(
+  List<Map<String, Object?>> habits,
+  List<Map<String, Object?>> chats,
+) => [
+  for (final h in habits)
     Project(
-      id: id,
-      name: name,
+      id: h['id'] as int,
+      name:
+          (h['name'] as String?) ??
+          resolve(fitnessPlugin.projectName, AppLanguage.en),
       chats: [
-        ChatInfo(id: '$id-general', title: 'General', general: true),
-        for (final t in topics) ChatInfo(id: '$id-$t', title: t),
+        for (final c in chats)
+          if (c['habit_id'] == h['id'])
+            ChatInfo(
+              id: c['id'] as int,
+              title: c['title'] as String,
+              general: c['kind'] == 'general',
+            ),
       ],
-    );
-
-/// Sample habits until projects are stored in the database. Only the first
-/// one has real data behind it.
-final _sampleProjects = [
-  _project('fitness', 'Improve my fitness', topics: newChatTopics),
-  _project('read', 'Read more'),
-  _project('water', 'Drink water'),
-  _project('sleep', 'Sleep earlier'),
-  _project('study', 'Study daily'),
+    ),
 ];
 
 class ProjectsController extends Notifier<ProjectsState> {
   @override
-  ProjectsState build() => ProjectsState(
-    projects: _sampleProjects,
-    currentId: _sampleProjects.first.id,
-    currentChatId: _sampleProjects.first.generalChat.id,
-  );
+  ProjectsState build() {
+    final start = ref.watch(startupProvider);
+    final projects = projectsFromRows(start.habits, start.chats);
+    return ProjectsState(
+      projects: projects,
+      currentId: projects.isEmpty ? 0 : projects.first.id,
+      currentChatId: projects.isEmpty ? 0 : projects.first.generalChat.id,
+    );
+  }
+
+  AppDatabase get _db => ref.read(databaseProvider);
+
+  /// Makes the first habit and its General chat if there is none yet. The
+  /// habit row is saved first, then the General chat.
+  Future<void> ensureHabit() async {
+    if (state.hasProject) return;
+    final name = resolve(fitnessPlugin.projectName, AppLanguage.en);
+    final habitId = await _db.createHabit(
+      pluginId: fitnessPlugin.id,
+      name: name,
+    );
+    final chatId = await _db.createChat(habitId, 'general', 'General');
+    state = ProjectsState(
+      projects: [
+        Project(
+          id: habitId,
+          name: name,
+          chats: [ChatInfo(id: chatId, title: 'General', general: true)],
+        ),
+      ],
+      currentId: habitId,
+      currentChatId: chatId,
+    );
+  }
 
   /// Tapping a habit makes it the current project, on its General chat.
-  void selectProject(String id) {
+  void selectProject(int id) {
     final project = state.projects.firstWhere((p) => p.id == id);
     state = ProjectsState(
       projects: state.projects,
@@ -88,7 +126,7 @@ class ProjectsController extends Notifier<ProjectsState> {
     ref.read(tabProvider.notifier).select(AppTab.chat);
   }
 
-  void selectChat(String chatId) {
+  void selectChat(int chatId) {
     state = ProjectsState(
       projects: state.projects,
       currentId: state.currentId,
@@ -101,7 +139,7 @@ class ProjectsController extends Notifier<ProjectsState> {
 
   /// Opens the chat with this name, or creates it. Returns false if the
   /// name is empty.
-  bool startChat(String name) {
+  Future<bool> startChat(String name) async {
     final title = name.trim();
     if (title.isEmpty) return false;
     final current = state.current;
@@ -112,7 +150,8 @@ class ProjectsController extends Notifier<ProjectsState> {
       selectChat(existing.first.id);
       return true;
     }
-    final chat = ChatInfo(id: '${current.id}-$title', title: title);
+    final id = await _db.createChat(current.id, 'topic', title);
+    final chat = ChatInfo(id: id, title: title);
     state = ProjectsState(
       projects: [
         for (final p in state.projects)
@@ -150,18 +189,18 @@ class TopicMessage {
 /// Messages of the topic chats, by chat id. A topic chat can only suggest:
 /// a suggestion is kept in [pendingSuggestion] until General is opened, where
 /// the rules engine and the user's yes decide.
-class TopicChats extends Notifier<Map<String, List<TopicMessage>>> {
+class TopicChats extends Notifier<Map<int, List<TopicMessage>>> {
   @override
-  Map<String, List<TopicMessage>> build() => {};
+  Map<int, List<TopicMessage>> build() => {};
 
   bool pendingSuggestion = false;
 
-  void _add(String chatId, TopicMessage m) => state = {
+  void _add(int chatId, TopicMessage m) => state = {
     ...state,
     chatId: [...(state[chatId] ?? const []), m],
   };
 
-  Future<void> send(String chatId, String topic, String raw) async {
+  Future<void> send(int chatId, String topic, String raw) async {
     final text = raw.trim();
     if (text.isEmpty) return;
     final history = [
@@ -210,6 +249,4 @@ class TopicChats extends Notifier<Map<String, List<TopicMessage>>> {
 }
 
 final topicChatsProvider =
-    NotifierProvider<TopicChats, Map<String, List<TopicMessage>>>(
-      TopicChats.new,
-    );
+    NotifierProvider<TopicChats, Map<int, List<TopicMessage>>>(TopicChats.new);

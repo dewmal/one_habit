@@ -1,6 +1,10 @@
 import 'package:one_preccent/ai/llm_client.dart';
 import 'package:one_preccent/app/dummy_data.dart';
 import 'package:one_preccent/chat/chat_controller.dart';
+import 'package:one_preccent/data/database_provider.dart';
+import 'package:one_preccent/data/startup.dart';
+
+import 'memory_database.dart';
 
 /// Fixed answers for widget tests. It never touches the network. The app
 /// itself has no fake: it always asks the gateway.
@@ -21,7 +25,26 @@ class TestLlmClient implements LlmClient {
   }) async => dummyStepsFor(level);
 }
 
-/// Overrides every widget test needs so the chat never calls the gateway.
+/// Overrides every widget test needs: no gateway calls, and a fresh in-memory
+/// database that already holds one habit with its General chat (an install
+/// that was closed before the first questions were answered).
 // The override list type comes from Riverpod; it is not imported here.
 // ignore: strict_top_level_inference
-testAiOverrides() => [llmProvider.overrideWithValue(TestLlmClient())];
+testAiOverrides({MemoryAppDatabase? database, LlmClient? client}) {
+  final db = database ?? seededDatabase();
+  return [
+    llmProvider.overrideWithValue(client ?? TestLlmClient()),
+    databaseProvider.overrideWithValue(db),
+    startupProvider.overrideWithValue(
+      Startup(habits: db.tables['habit']!, chats: db.tables['chat']!),
+    ),
+  ];
+}
+
+/// One habit "Improve my fitness" with its General chat. Ids are 1.
+MemoryAppDatabase seededDatabase() {
+  final db = MemoryAppDatabase();
+  db.createHabit(pluginId: 'fitness', name: 'Improve my fitness');
+  db.createChat(1, 'general', 'General');
+  return db;
+}

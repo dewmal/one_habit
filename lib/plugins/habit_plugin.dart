@@ -7,6 +7,7 @@ class HabitPlugin {
   const HabitPlugin({
     required this.id,
     required this.name,
+    required this.projectName,
     required this.icon,
     required this.colorValue,
     required this.description,
@@ -21,6 +22,9 @@ class HabitPlugin {
 
   final String id;
   final Map<AppLanguage, String> name;
+
+  /// The habit's name in the side menu, like "Improve my fitness".
+  final Map<AppLanguage, String> projectName;
   final String icon;
   final int colorValue;
   final Map<AppLanguage, String> description;
