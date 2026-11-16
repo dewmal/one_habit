@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../ai/connection_status.dart';
 import '../chat/chat_controller.dart';
 import '../components/info_card.dart';
 import '../components/log_card.dart';
@@ -43,6 +44,7 @@ class ChatPage extends ConsumerWidget {
       body: SafeArea(
         child: Column(
           children: [
+            _ConnectionBar(language: language),
             ChatHeader(
               title: tr('chat.general', language),
               subtitle: tr('chat.coach', language),
@@ -235,6 +237,53 @@ class _DemoMenu extends StatelessWidget {
           child: Text('Demo: notifications'),
         ),
       ],
+    );
+  }
+}
+
+/// Thin strip at the top showing whether the gateway is reachable.
+class _ConnectionBar extends ConsumerWidget {
+  const _ConnectionBar({required this.language});
+
+  final AppLanguage language;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final status = ref.watch(connectionProvider);
+    final (key, color) = switch (status) {
+      GatewayState.online => ('conn.online', const Color(0xFF3FA66B)),
+      GatewayState.checking => ('conn.checking', const Color(0xFFB8A04A)),
+      GatewayState.offline => ('conn.offline', const Color(0xFFD0594E)),
+      GatewayState.notConfigured => (
+        'conn.not_configured',
+        const Color(0xFFD0594E),
+      ),
+    };
+    return InkWell(
+      onTap: ref.read(connectionProvider.notifier).check,
+      child: Container(
+        width: double.infinity,
+        color: AppColors.bgDeep,
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                tr(key, language),
+                style: AppText.bodyMuted,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

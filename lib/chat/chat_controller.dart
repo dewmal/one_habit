@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../ai/connection_status.dart' show gatewayUrl;
 import '../ai/gateway_llm_client.dart';
 import '../ai/llm_client.dart';
 import '../app/app_state.dart';
@@ -550,8 +551,7 @@ final chatProvider = NotifierProvider<ChatController, ChatState>(
 /// The gateway URL comes from the build: --dart-define=GATEWAY_URL=https://...
 /// Every AI call goes to the gateway. With no URL, the calls fail with
 /// no_connection and the calm message shows; nothing is faked.
-const _gatewayUrl = String.fromEnvironment('GATEWAY_URL');
 
 final llmProvider = Provider<LlmClient>(
-  (ref) => GatewayLlmClient(gatewayUrl: _gatewayUrl),
+  (ref) => GatewayLlmClient(gatewayUrl: gatewayUrl),
 );
