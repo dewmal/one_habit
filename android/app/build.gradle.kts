@@ -5,6 +5,8 @@ val keystorePropertiesFile = rootProject.file("key.properties")
 val keystoreProperties = Properties().apply {
     if (keystorePropertiesFile.exists()) load(FileInputStream(keystorePropertiesFile))
 }
+val hasReleaseSigning = listOf("keyAlias", "keyPassword", "storeFile", "storePassword")
+    .all { !keystoreProperties.getProperty(it).isNullOrBlank() }
 
 plugins {
     id("com.android.application")
@@ -15,11 +17,11 @@ plugins {
 android {
     signingConfigs {
         create("release") {
-            if (keystorePropertiesFile.exists()) {
-                keyAlias = keystoreProperties["keyAlias"] as String
-                keyPassword = keystoreProperties["keyPassword"] as String
-                storeFile = file(keystoreProperties["storeFile"] as String)
-                storePassword = keystoreProperties["storePassword"] as String
+            if (hasReleaseSigning) {
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+                storeFile = file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
             }
         }
     }
@@ -52,10 +54,10 @@ android {
         release {
             // Use the upload key from android/key.properties (written from GitHub
             // secrets in CI). Without it, fall back to debug signing for local runs only.
-            signingConfig = if (keystorePropertiesFile.exists()) {
+            signingConfig = if (hasReleaseSigning) {
                 signingConfigs.getByName("release")
             } else {
-                logger.warn("android/key.properties not found: release build is debug-signed and must not be uploaded to Play.")
+                logger.warn("android/key.properties missing or incomplete: release build is debug-signed and must not be uploaded to Play.")
                 signingConfigs.getByName("debug")
             }
         }
