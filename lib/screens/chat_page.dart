@@ -44,11 +44,16 @@ class ChatPage extends ConsumerWidget {
       body: SafeArea(
         child: Column(
           children: [
-            _ConnectionBar(language: language),
             ChatHeader(
               title: tr('chat.general', language),
               subtitle: tr('chat.coach', language),
-              trailing: kDebugMode ? _DemoMenu(controller: controller) : null,
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _ConnectionDot(language: language),
+                  if (kDebugMode) _DemoMenu(controller: controller),
+                ],
+              ),
             ),
             Expanded(
               child: ListView(
@@ -241,9 +246,10 @@ class _DemoMenu extends StatelessWidget {
   }
 }
 
-/// Thin strip at the top showing whether the gateway is reachable.
-class _ConnectionBar extends ConsumerWidget {
-  const _ConnectionBar({required this.language});
+/// A small round light in the title bar: green online, yellow checking,
+/// red offline or not set. Tap it to read the status and retry.
+class _ConnectionDot extends ConsumerWidget {
+  const _ConnectionDot({required this.language});
 
   final AppLanguage language;
 
@@ -252,38 +258,69 @@ class _ConnectionBar extends ConsumerWidget {
     final status = ref.watch(connectionProvider);
     final (key, color) = switch (status) {
       GatewayState.online => ('conn.online', const Color(0xFF3FA66B)),
-      GatewayState.checking => ('conn.checking', const Color(0xFFB8A04A)),
+      GatewayState.checking => ('conn.checking', const Color(0xFFE0B341)),
       GatewayState.offline => ('conn.offline', const Color(0xFFD0594E)),
       GatewayState.notConfigured => (
         'conn.not_configured',
         const Color(0xFFD0594E),
       ),
     };
-    return InkWell(
-      onTap: ref.read(connectionProvider.notifier).check,
-      child: Container(
-        width: double.infinity,
-        color: AppColors.bgDeep,
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-            ),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                tr(key, language),
-                style: AppText.bodyMuted,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
+    return IconButton(
+      tooltip: tr(key, language),
+      onPressed: () => showDialog<void>(
+        context: context,
+        builder: (_) => _ConnectionDialog(language: language),
+      ),
+      icon: Container(
+        width: 14,
+        height: 14,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          boxShadow: [BoxShadow(color: color.withAlpha(110), blurRadius: 6)],
         ),
       ),
+    );
+  }
+}
+
+class _ConnectionDialog extends ConsumerWidget {
+  const _ConnectionDialog({required this.language});
+
+  final AppLanguage language;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final status = ref.watch(connectionProvider);
+    final key = switch (status) {
+      GatewayState.online => 'conn.online',
+      GatewayState.checking => 'conn.checking',
+      GatewayState.offline => 'conn.offline',
+      GatewayState.notConfigured => 'conn.not_configured',
+    };
+    return AlertDialog(
+      title: Text(tr('conn.title', language)),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(tr(key, language)),
+          if (gatewayUrl.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(gatewayUrl, style: AppText.bodyMuted),
+          ],
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: ref.read(connectionProvider.notifier).check,
+          child: Text(tr('conn.retry', language)),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(tr('conn.close', language)),
+        ),
+      ],
     );
   }
 }

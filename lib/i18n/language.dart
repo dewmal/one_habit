@@ -43,14 +43,17 @@ const Map<String, Map<AppLanguage, String>> _strings = {
   'chat.question_label': {AppLanguage.en: 'Question {n} of {total}'},
   'chat.health_next': {AppLanguage.en: 'Thanks. Next, a quick health check.'},
   'chat.noted': {AppLanguage.en: 'Noted.'},
+  'conn.title': {AppLanguage.en: 'Connection', AppLanguage.si: 'සම්බන්ධතාව'},
+  'conn.retry': {AppLanguage.en: 'Retry', AppLanguage.si: 'නැවත'},
+  'conn.close': {AppLanguage.en: 'Close', AppLanguage.si: 'වසන්න'},
   'conn.online': {AppLanguage.en: 'Connected', AppLanguage.si: 'සම්බන්ධයි'},
   'conn.checking': {
     AppLanguage.en: 'Connecting…',
     AppLanguage.si: 'සම්බන්ධ වෙමින්…',
   },
   'conn.offline': {
-    AppLanguage.en: 'Offline. Tap to retry.',
-    AppLanguage.si: 'සම්බන්ධතාවයක් නැත. නැවත උත්සාහ කරන්න.',
+    AppLanguage.en: 'Offline. The gateway could not be reached.',
+    AppLanguage.si: 'සම්බන්ධතාවයක් නැත.',
   },
   'conn.not_configured': {
     AppLanguage.en: 'Gateway not set in this build',
