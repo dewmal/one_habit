@@ -1,17 +1,27 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../app/settings_state.dart';
+import '../data/profile_store.dart';
+
 enum AppLanguage { en, si }
 
 /// Holds the current language. Changing it updates every watching widget at once.
-/// Persisting it to the profile table is added with the database task.
+/// The choice is saved in the profile row.
 class LanguageController extends Notifier<AppLanguage> {
   @override
-  AppLanguage build() => AppLanguage.en;
+  AppLanguage build() {
+    final name = savedProfile(ref)?['language'];
+    return AppLanguage.values.where((l) => l.name == name).firstOrNull ??
+        AppLanguage.en;
+  }
 
-  void set(AppLanguage language) => state = language;
+  void set(AppLanguage language) {
+    state = language;
+    saveProfile(ref, language: language, settings: ref.read(settingsProvider));
+  }
 
   void toggle() =>
-      state = state == AppLanguage.en ? AppLanguage.si : AppLanguage.en;
+      set(state == AppLanguage.en ? AppLanguage.si : AppLanguage.en);
 }
 
 final languageProvider = NotifierProvider<LanguageController, AppLanguage>(

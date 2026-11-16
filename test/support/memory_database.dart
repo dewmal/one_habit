@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:one_preccent/data/app_database.dart';
 
 /// A pure Dart copy of [AppDatabase] for widget tests. It follows the same
@@ -164,4 +166,79 @@ class MemoryAppDatabase implements AppDatabase {
     ];
     return all.length <= limit ? all : all.sublist(all.length - limit);
   }
+
+  @override
+  Future<Map<String, Object?>?> planOf(int habitId) async {
+    for (final r in tables['plan']!) {
+      if (r['habit_id'] == habitId) return {...r};
+    }
+    return null;
+  }
+
+  @override
+  Future<void> savePlan(
+    int habitId, {
+    required int stageIndex,
+    required List<String> tasks,
+  }) async {
+    tables['plan']!.removeWhere((r) => r['habit_id'] == habitId);
+    tables['plan']!.add({
+      'id': _next('plan'),
+      'habit_id': habitId,
+      'stage_index': stageIndex,
+      'tasks': jsonEncode(tasks),
+    });
+  }
+
+  @override
+  Future<void> clearPlan(int habitId) async =>
+      tables['plan']!.removeWhere((r) => r['habit_id'] == habitId);
+
+  @override
+  Future<List<Map<String, Object?>>> logsOf(int habitId) async {
+    final logs = [
+      for (final r in tables['daily_log']!)
+        if (r['habit_id'] == habitId) {...r},
+    ];
+    logs.sort(
+      (a, b) => (b['log_date'] as String).compareTo(a['log_date'] as String),
+    );
+    return logs;
+  }
+
+  @override
+  Future<void> saveDay(
+    int habitId, {
+    required String date,
+    required String results,
+    String? feeling,
+  }) async {
+    tables['daily_log']!.removeWhere(
+      (r) => r['habit_id'] == habitId && r['log_date'] == date,
+    );
+    tables['daily_log']!.add({
+      'id': _next('daily_log'),
+      'habit_id': habitId,
+      'log_date': date,
+      'results': results,
+      'feeling': feeling,
+    });
+  }
+
+  @override
+  Future<void> clearLog(int habitId) async =>
+      tables['daily_log']!.removeWhere((r) => r['habit_id'] == habitId);
+
+  @override
+  Future<Map<String, Object?>?> profile() async =>
+      tables['profile']!.isEmpty ? null : {...tables['profile']!.first};
+
+  @override
+  Future<void> saveProfile(Map<String, Object?> values) async =>
+      tables['profile']!
+        ..clear()
+        ..add({...values, 'id': 1});
+
+  @override
+  Future<void> clearProfile() async => tables['profile']!.clear();
 }

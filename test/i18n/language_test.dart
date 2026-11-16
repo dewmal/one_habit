@@ -2,9 +2,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:one_preccent/i18n/language.dart';
 
+import '../support/test_llm_client.dart';
+
 void main() {
   test('starts in English and toggles to Sinhala and back', () {
-    final container = ProviderContainer();
+    final container = ProviderContainer(overrides: testAiOverrides());
     addTearDown(container.dispose);
 
     expect(container.read(languageProvider), AppLanguage.en);

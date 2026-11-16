@@ -16,6 +16,8 @@ class HabitPlugin {
     required this.stages,
     required this.moveOnRule,
     required this.taskGuide,
+    required this.stepLadder,
+    required this.fallbackSteps,
     required this.cards,
     this.healthCheck,
   });
@@ -35,6 +37,13 @@ class HabitPlugin {
 
   /// Instructions for the AI on writing tiny daily tasks.
   final String taskGuide;
+
+  /// Steps from the tiniest to the biggest. A smaller or bigger step is the
+  /// neighbour on this ladder, so the AI is never needed to make a step smaller.
+  final List<String> stepLadder;
+
+  /// Steps shown for a level when the AI cannot write them.
+  final Map<String, List<String>> fallbackSteps;
 
   /// Card kinds this plugin uses, named by [CardKind].
   final List<CardKind> cards;
@@ -99,4 +108,23 @@ enum CardKind {
   stageCard,
   progressCard,
   timePicker,
+}
+
+extension HabitSteps on HabitPlugin {
+  /// The steps for [level] when the gateway cannot be reached.
+  List<String> fallbackStepsFor(String level) =>
+      List<String>.of(fallbackSteps[level] ?? fallbackSteps.values.first);
+
+  int _ladderIndex(String step) {
+    final i = stepLadder.indexOf(step);
+    return i < 0 ? 0 : i;
+  }
+
+  /// The step one rung down. Never goes below the tiniest step.
+  String smallerStep(String step) =>
+      stepLadder[(_ladderIndex(step) - 1).clamp(0, stepLadder.length - 1)];
+
+  /// The step one rung up. Never goes above the biggest step.
+  String biggerStep(String step) =>
+      stepLadder[(_ladderIndex(step) + 1).clamp(0, stepLadder.length - 1)];
 }

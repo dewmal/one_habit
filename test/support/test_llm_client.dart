@@ -1,5 +1,6 @@
+import 'package:one_preccent/plugins/habit_plugin.dart';
 import 'package:one_preccent/ai/llm_client.dart';
-import 'package:one_preccent/app/dummy_data.dart';
+import 'package:one_preccent/plugins/fitness_plugin.dart';
 import 'package:one_preccent/chat/chat_controller.dart';
 import 'package:one_preccent/data/database_provider.dart';
 import 'package:one_preccent/data/startup.dart';
@@ -22,7 +23,7 @@ class TestLlmClient implements LlmClient {
     required String language,
     required String level,
     required String taskGuide,
-  }) async => dummyStepsFor(level);
+  }) async => fitnessPlugin.fallbackStepsFor(level);
 }
 
 /// Overrides every widget test needs: no gateway calls, and a fresh in-memory
@@ -36,15 +37,27 @@ testAiOverrides({MemoryAppDatabase? database, LlmClient? client}) {
     llmProvider.overrideWithValue(client ?? TestLlmClient()),
     databaseProvider.overrideWithValue(db),
     startupProvider.overrideWithValue(
-      Startup(habits: db.tables['habit']!, chats: db.tables['chat']!),
+      Startup(
+        habits: db.tables['habit']!,
+        chats: db.tables['chat']!,
+        generalMessages: db.tables['chat_message']!,
+        plan: db.tables['plan']!.firstOrNull,
+        logs: [...db.tables['daily_log']!]
+          ..sort(
+            (a, b) =>
+                (b['log_date'] as String).compareTo(a['log_date'] as String),
+          ),
+        profile: db.tables['profile']!.firstOrNull,
+      ),
     ),
   ];
 }
 
 /// One habit "Improve my fitness" with its General chat. Ids are 1.
-MemoryAppDatabase seededDatabase() {
+MemoryAppDatabase seededDatabase({String? goal}) {
   final db = MemoryAppDatabase();
   db.createHabit(pluginId: 'fitness', name: 'Improve my fitness');
+  if (goal != null) db.updateHabit(1, {'goal': goal, 'level': 'beginner'});
   db.createChat(1, 'general', 'General');
   return db;
 }

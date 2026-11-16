@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../data/profile_store.dart';
+import '../i18n/language.dart';
+
 /// The shared "About you" settings: reminders and quiet hours.
 class SettingsState {
   const SettingsState({
@@ -39,7 +42,25 @@ const maxDailyLimit = 5;
 
 class SettingsController extends Notifier<SettingsState> {
   @override
-  SettingsState build() => const SettingsState();
+  SettingsState build() {
+    final row = savedProfile(ref);
+    if (row == null) return const SettingsState();
+    const d = SettingsState();
+    return SettingsState(
+      dailyLimit: (row['daily_limit'] as int?) ?? d.dailyLimit,
+      morning: parseTime(row['morning_time']) ?? d.morning,
+      evening: parseTime(row['evening_time']) ?? d.evening,
+      quietStart: parseTime(row['quiet_start']) ?? d.quietStart,
+      quietEnd: parseTime(row['quiet_end']) ?? d.quietEnd,
+    );
+  }
+
+  /// Every change is saved to the profile row.
+  @override
+  set state(SettingsState value) {
+    super.state = value;
+    saveProfile(ref, language: ref.read(languageProvider), settings: value);
+  }
 
   void changeDailyLimit(int delta) {
     final next = (state.dailyLimit + delta).clamp(minDailyLimit, maxDailyLimit);

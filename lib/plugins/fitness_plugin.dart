@@ -81,6 +81,32 @@ const fitnessPlugin = HabitPlugin(
     AppLanguage.en: 'Move on only when you say yes. (placeholder rule)',
   },
   taskGuide: 'Write 1 to 3 tiny tasks for the current stage. Never bigger than the stage allows.',
+  stepLadder: [
+    'Put on one shoe',
+    'Put on your gym shoes',
+    'Pack your gym bag tonight',
+    'Walk to the gym door',
+    'Stay for 5 minutes',
+    'Stay for 10 minutes',
+    'Stay for 15 minutes',
+  ],
+  fallbackSteps: {
+    'beginner': [
+      'Pack your gym bag tonight',
+      'Walk to the gym door',
+      'Stay for 5 minutes',
+    ],
+    'building': [
+      'Pack your gym bag tonight',
+      'Walk to the gym door',
+      'Stay for 10 minutes',
+    ],
+    'ready': [
+      'Go to the gym',
+      'Do 15 minutes of work',
+      'Stretch for 5 minutes',
+    ],
+  },
   cards: [
     CardKind.quickReplies,
     CardKind.yesNo,

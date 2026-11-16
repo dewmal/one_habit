@@ -10,6 +10,9 @@ class Startup {
     this.habits = const [],
     this.chats = const [],
     this.generalMessages = const [],
+    this.plan,
+    this.logs = const [],
+    this.profile,
   });
 
   /// Habit rows, oldest first.
@@ -21,9 +24,17 @@ class Startup {
   /// Messages of the first habit's General chat, oldest first.
   final List<Map<String, Object?>> generalMessages;
 
+  /// The first habit's plan row and daily log (newest first).
+  final Map<String, Object?>? plan;
+  final List<Map<String, Object?>> logs;
+
+  /// The profile row: language and settings.
+  final Map<String, Object?>? profile;
+
   static Future<Startup> load(AppDatabase db) async {
+    final profile = await db.profile();
     final habits = await db.habits();
-    if (habits.isEmpty) return const Startup();
+    if (habits.isEmpty) return Startup(profile: profile);
     final chats = <Map<String, Object?>>[];
     for (final habit in habits) {
       chats.addAll(await db.chatsOf(habit['id'] as int));
@@ -34,7 +45,15 @@ class Startup {
         messages = await db.messagesOf(c['id'] as int);
       }
     }
-    return Startup(habits: habits, chats: chats, generalMessages: messages);
+    final first = habits.first['id'] as int;
+    return Startup(
+      habits: habits,
+      chats: chats,
+      generalMessages: messages,
+      plan: await db.planOf(first),
+      logs: await db.logsOf(first),
+      profile: profile,
+    );
   }
 }
 

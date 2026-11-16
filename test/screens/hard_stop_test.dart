@@ -1,13 +1,14 @@
+import 'package:one_preccent/plugins/habit_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:one_preccent/app/app_state.dart';
 import 'package:one_preccent/app/day_state.dart';
-import 'package:one_preccent/app/dummy_data.dart';
 import 'package:one_preccent/app/rules.dart';
 import 'package:one_preccent/chat/chat_controller.dart';
 import 'package:one_preccent/main.dart';
+import 'package:one_preccent/plugins/fitness_plugin.dart';
 
 import '../support/menu.dart';
 import '../support/test_llm_client.dart';
@@ -32,7 +33,9 @@ void main() {
     final container = ProviderScope.containerOf(
       tester.element(find.byType(HabitAgentApp)),
     );
-    container.read(dayProvider.notifier).startDay(dummyStepsFor('beginner'));
+    container
+        .read(dayProvider.notifier)
+        .startDay(fitnessPlugin.fallbackStepsFor('beginner'));
     container.read(appProvider.notifier).finishOnboarding();
     await tester.pumpAndSettle();
     await chooseInMenu(tester, 'General');

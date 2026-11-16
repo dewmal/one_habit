@@ -18,11 +18,13 @@ void main() {
 
       await tester.pumpWidget(
         ProviderScope(
-          overrides: testAiOverrides(),
+          overrides: testAiOverrides(
+            database: seededDatabase(goal: 'Gym every day'),
+          ),
           child: const HabitAgentApp(),
         ),
       );
-      // Dummy session: go straight to the main app.
+      // Go straight to the main app.
       final container = ProviderScope.containerOf(
         tester.element(find.byType(HabitAgentApp)),
       );

@@ -47,6 +47,40 @@ abstract class AppDatabase {
   /// together.
   Future<void> deleteHabit(int id);
 
+  // Plan, daily log and settings
+
+  /// The habit's plan row, or null. `tasks` is a JSON list of strings.
+  Future<Map<String, Object?>?> planOf(int habitId);
+
+  Future<void> savePlan(
+    int habitId, {
+    required int stageIndex,
+    required List<String> tasks,
+  });
+
+  Future<void> clearPlan(int habitId);
+
+  /// The daily log of a habit, newest day first. `results` is JSON, task
+  /// index to done, partly or skipped.
+  Future<List<Map<String, Object?>>> logsOf(int habitId);
+
+  /// Saves one day. A day is saved once: a second call replaces it.
+  Future<void> saveDay(
+    int habitId, {
+    required String date,
+    required String results,
+    String? feeling,
+  });
+
+  Future<void> clearLog(int habitId);
+
+  /// The one profile row (language and settings), or null.
+  Future<Map<String, Object?>?> profile();
+
+  Future<void> saveProfile(Map<String, Object?> values);
+
+  Future<void> clearProfile();
+
   // Chats
 
   /// Makes a chat. kind is 'general' or 'topic'. Returns the new chat id.

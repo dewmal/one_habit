@@ -7,7 +7,6 @@ import '../ai/gateway_llm_client.dart';
 import '../ai/llm_client.dart';
 import '../app/app_state.dart';
 import '../app/day_state.dart';
-import '../app/dummy_data.dart';
 import '../app/projects.dart';
 import '../app/rules.dart';
 import '../data/app_database.dart';
@@ -15,6 +14,7 @@ import '../data/database_provider.dart';
 import '../data/startup.dart';
 import '../i18n/language.dart';
 import '../plugins/fitness_plugin.dart';
+import '../plugins/habit_plugin.dart';
 import 'chat_message.dart';
 import 'history.dart';
 
@@ -275,12 +275,22 @@ class ChatController extends Notifier<ChatState> {
     }
   }
 
+  /// The steps of the plan now: today's tasks, or the ones just agreed.
+  List<String> get _currentSteps {
+    final tasks = ref.read(dayProvider).tasks;
+    if (tasks.isNotEmpty) return tasks;
+    return state.steps.isNotEmpty
+        ? state.steps
+        : fitnessPlugin.fallbackStepsFor(state.level ?? 'beginner');
+  }
+
   /// The offer after a steady run. Shown only; the plan changes on a yes.
   Future<void> openStepUp() async {
     if (ref.read(dayProvider).paused) return;
+    final now = _currentSteps.last;
     await _save(
       'assistant',
-      card: const StepUpCardData(now: dummyNowStep, bigger: dummyBiggerStep),
+      card: StepUpCardData(now: now, bigger: fitnessPlugin.biggerStep(now)),
     );
   }
 
@@ -289,7 +299,10 @@ class ChatController extends Notifier<ChatState> {
     final allowed = canStepUp(userSaidYes: yes);
     await _answer(messageId, yes ? 'yes' : 'not_yet');
     if (allowed) {
-      state = state.copyWith(steps: [dummyBiggerStep]);
+      // The bigger step is saved in the plan and starts tomorrow.
+      final bigger = fitnessPlugin.biggerStep(_currentSteps.last);
+      state = state.copyWith(steps: [bigger]);
+      ref.read(dayProvider.notifier).planTasks([bigger]);
       await _sayKey('stepup.yes_ack');
     } else {
       await _sayKey('stepup.not_yet_ack');
@@ -303,7 +316,7 @@ class ChatController extends Notifier<ChatState> {
     await _sayKey('missed.phrase');
     await _showSmallerStep(
       from: ref.read(dayProvider).tasks.length,
-      step: dummySmallestStep,
+      step: fitnessPlugin.smallerStep(_currentSteps.first),
     );
   }
 
@@ -312,6 +325,7 @@ class ChatController extends Notifier<ChatState> {
     required String step,
   }) async {
     state = state.copyWith(steps: [step]);
+    ref.read(dayProvider.notifier).planTasks([step]);
     for (final m in state.messages.toList()) {
       if (m.card is MissedDayCardData) await _answer(m.id, 'replaced');
     }
@@ -326,7 +340,10 @@ class ChatController extends Notifier<ChatState> {
       case 'okay':
         await _sayKey('missed.okay_ack');
       case 'still_too_much':
-        await _showSmallerStep(from: 1, step: dummyTinierStep);
+        await _showSmallerStep(
+          from: 1,
+          step: fitnessPlugin.smallerStep(state.steps.first),
+        );
       default:
         await _sayKey('chat.noted');
     }
@@ -393,7 +410,7 @@ class ChatController extends Notifier<ChatState> {
     } catch (_) {
       await _sayKey('chat.no_connection');
     }
-    return dummyStepsFor(level);
+    return fitnessPlugin.fallbackStepsFor(level);
   }
 
   String _languageName() =>

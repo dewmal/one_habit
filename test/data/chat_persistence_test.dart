@@ -2,7 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:one_preccent/app/app_state.dart';
+import 'package:one_preccent/app/day_state.dart';
 import 'package:one_preccent/app/projects.dart';
+import 'package:one_preccent/app/settings_state.dart';
 import 'package:one_preccent/chat/chat_controller.dart';
 import 'package:one_preccent/data/database_provider.dart';
 import 'package:one_preccent/data/startup.dart';
@@ -81,5 +83,26 @@ void main() {
     expect(rows.length, 1);
     expect(rows.single['text_key'], 'chat.greeting');
     expect(second.read(projectsProvider).projects.length, 1);
+  });
+
+  test('plan, ticks, hard stop and settings survive a restart', () async {
+    final db = MemoryAppDatabase();
+    final first = await launch(db);
+    await first.read(appProvider.notifier).startOnboarding();
+    await db.updateHabit(1, {'level': 'beginner'});
+    first.read(dayProvider.notifier).startDay(['Walk to the gym door']);
+    first.read(dayProvider.notifier).toggleTask(0);
+    first.read(dayProvider.notifier).setPaused(true);
+    first.read(settingsProvider.notifier).changeDailyLimit(1);
+    first.read(languageProvider.notifier).set(AppLanguage.si);
+    await settle();
+
+    final second = await launch(db);
+    final day = second.read(dayProvider);
+    expect(day.tasks, ['Walk to the gym door']);
+    expect(day.results, {0: TaskResult.done});
+    expect(day.paused, isTrue);
+    expect(second.read(settingsProvider).dailyLimit, 3);
+    expect(second.read(languageProvider), AppLanguage.si);
   });
 }

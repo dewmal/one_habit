@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app/day_state.dart';
-import '../app/dummy_data.dart';
 import '../chat/chat_controller.dart';
 import '../app/projects.dart';
 import '../components/screen_title_bar.dart';
@@ -23,7 +22,7 @@ class PlanPage extends ConsumerWidget {
       (l) => l.id == (chat.level ?? 'beginner'),
       orElse: () => fitnessPlugin.levels.first,
     );
-    final goal = chat.goal ?? resolve(dummyGoal, language);
+    final goal = chat.goal;
     final stages = fitnessPlugin.stages;
 
     return SafeArea(
@@ -44,7 +43,7 @@ class PlanPage extends ConsumerWidget {
               current: stage.index == current,
               rule: resolve(fitnessPlugin.moveOnRule, language),
               youAreHere: tr('plan.here', language),
-              goalLine: stage.index == stages.length - 1
+              goalLine: goal != null && stage.index == stages.length - 1
                   ? resolve(textOf('plan.goal', {'goal': goal}), language)
                   : null,
             ),

@@ -314,4 +314,88 @@ class SqlAppDatabase implements AppDatabase {
     await txn.delete('daily_log', where: 'habit_id = ?', whereArgs: [id]);
     await txn.delete('habit', where: 'id = ?', whereArgs: [id]);
   });
+
+  @override
+  Future<Map<String, Object?>?> planOf(int habitId) async {
+    final rows = await _db.query(
+      'plan',
+      where: 'habit_id = ?',
+      whereArgs: [habitId],
+      limit: 1,
+    );
+    return rows.isEmpty ? null : rows.first;
+  }
+
+  @override
+  Future<void> savePlan(
+    int habitId, {
+    required int stageIndex,
+    required List<String> tasks,
+  }) async {
+    final values = {'stage_index': stageIndex, 'tasks': jsonEncode(tasks)};
+    final changed = await _db.update(
+      'plan',
+      values,
+      where: 'habit_id = ?',
+      whereArgs: [habitId],
+    );
+    if (changed == 0) {
+      await _db.insert('plan', {'habit_id': habitId, ...values});
+    }
+  }
+
+  @override
+  Future<void> clearPlan(int habitId) =>
+      _db.delete('plan', where: 'habit_id = ?', whereArgs: [habitId]);
+
+  @override
+  Future<List<Map<String, Object?>>> logsOf(int habitId) => _db.query(
+    'daily_log',
+    where: 'habit_id = ?',
+    whereArgs: [habitId],
+    orderBy: 'log_date DESC',
+  );
+
+  @override
+  Future<void> saveDay(
+    int habitId, {
+    required String date,
+    required String results,
+    String? feeling,
+  }) async {
+    final values = {'results': results, 'feeling': feeling};
+    final changed = await _db.update(
+      'daily_log',
+      values,
+      where: 'habit_id = ? AND log_date = ?',
+      whereArgs: [habitId, date],
+    );
+    if (changed == 0) {
+      await _db.insert('daily_log', {
+        'habit_id': habitId,
+        'log_date': date,
+        ...values,
+      });
+    }
+  }
+
+  @override
+  Future<void> clearLog(int habitId) =>
+      _db.delete('daily_log', where: 'habit_id = ?', whereArgs: [habitId]);
+
+  @override
+  Future<Map<String, Object?>?> profile() async {
+    final rows = await _db.query('profile', limit: 1);
+    return rows.isEmpty ? null : rows.first;
+  }
+
+  @override
+  Future<void> saveProfile(Map<String, Object?> values) => _db.insert(
+    'profile',
+    {...values, 'id': 1},
+    conflictAlgorithm: ConflictAlgorithm.replace,
+  );
+
+  @override
+  Future<void> clearProfile() => _db.delete('profile');
 }
